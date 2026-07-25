@@ -184,7 +184,7 @@ _XFUNCPROTOBEGIN
  */
 
 extern void XawListChange(Widget /* w */,
-                          String * /* list */,
+                          const char ** /* list */,
                           int /* nitems */,
                           int /* longest */,
 #if NeedWidePrototypes

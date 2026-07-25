@@ -98,8 +98,9 @@ static void SetResource(Widget, char *, XtArgVal);
 static void SetSearchLabels(struct SearchAndReplace *, String, String, Boolean);
 static void DoReplaceOne(Widget, XtPointer, XtPointer);
 static void DoReplaceAll(Widget, XtPointer, XtPointer);
+typedef void (*XawDialogAddFunc)(Widget, String, Widget);
 static Widget
-CreateDialog(Widget, String, String, void (*)(Widget, String, Widget));
+CreateDialog(Widget, String, String, XawDialogAddFunc);
 static Widget  GetShell(Widget);
 static void    SetWMProtocolTranslations(Widget);
 static Boolean DoSearch(struct SearchAndReplace *);
@@ -107,7 +108,7 @@ static Boolean SetResourceByName(Widget, char *, char *, XtArgVal);
 static Boolean Replace(struct SearchAndReplace *, Boolean, Boolean);
 static String  GetString(Widget);
 static String  GetStringRaw(Widget);
-static void    AddInsertFileChildren(Widget, const char *, Widget);
+static void    AddInsertFileChildren(Widget, String, Widget);
 static Boolean InsertFileNamed(Widget, char *);
 static void    AddSearchChildren(Widget, String, Widget);
 
@@ -204,7 +205,8 @@ _XawTextInsertFile(Widget    w,
     if (!ctx->text.file_insert)
     {
         ctx->text.file_insert =
-            CreateDialog(w, ptr, "insertFile", AddInsertFileChildren);
+            CreateDialog(w, ptr, "insertFile",
+                         (XawDialogAddFunc)AddInsertFileChildren);
         XtRealizeWidget(ctx->text.file_insert);
         SetWMProtocolTranslations(ctx->text.file_insert);
     }
@@ -343,7 +345,7 @@ InsertFileNamed(Widget tw, char *str)
  */
 
 static void
-AddInsertFileChildren(Widget form, const char *ptr, Widget tw)
+AddInsertFileChildren(Widget form, String ptr, Widget tw)
 {
     Arg            args[10];
     Cardinal       num_args;
@@ -1464,10 +1466,7 @@ CenterWidgetOnPoint(Widget w, XEvent *event)
  */
 
 static Widget
-CreateDialog(Widget parent,
-             String ptr,
-             String name,
-             void (*func)(Widget, String, Widget))
+CreateDialog(Widget parent, String ptr, String name, XawDialogAddFunc func)
 {
     Widget   popup, form;
     Arg      args[5];

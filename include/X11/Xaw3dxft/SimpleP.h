@@ -55,6 +55,7 @@ SOFTWARE.
 typedef struct
 {
     Boolean (*change_sensitive)(Widget);
+    XtPointer extension; /* classic Xaw7 compatibility */
 } SimpleClassPart;
 
 #define XtInheritChangeSensitive ((Boolean(*)(Widget))_XtInherit)

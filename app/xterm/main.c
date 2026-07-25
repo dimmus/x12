@@ -95,24 +95,12 @@
 
 #if OPT_TOOLBAR
 
-#if defined(HAVE_LIB_XAW)
 #include "X11/Xaw/Form.h"
-#elif defined(HAVE_LIB_XAW3D)
-#include "X11/Xaw3d/Form.h"
-#elif defined(HAVE_LIB_XAW3DXFT)
-#include "X11/Xaw3dxft/Form.h"
-#include "X11/Xaw3dxft/Xaw3dXft.h"
-#elif defined(HAVE_LIB_NEXTAW)
-#include "X11/neXtaw/Form.h"
-#elif defined(HAVE_LIB_XAWPLUS)
-#include "X11/XawPlus/Form.h"
-#endif
+#include "X11/Xaw/Xaw3dXft.h"
 
 #else
 
-#if defined(HAVE_LIB_XAW3DXFT)
-#include "X11/Xaw3dxft/Xaw3dXft.h"
-#endif
+#include "X11/Xaw/Xaw3dXft.h"
 
 #endif /* OPT_TOOLBAR */
 

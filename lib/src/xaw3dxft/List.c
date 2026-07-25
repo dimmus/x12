@@ -1205,7 +1205,7 @@ XawListChange(Widget       w,
     Dimension  new_width  = w->core.width;
     Dimension  new_height = w->core.height;
 
-    lw->list.list = list;
+    lw->list.list = (String *)list;
 
     if (nitems <= 0) nitems = 0;
     lw->list.nitems = nitems;

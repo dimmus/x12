@@ -1,5 +1,6 @@
 /*
 Copyright (c) 1989, 1994  X Consortium
+Copyright 2003-2004 Roland Mainz <roland.mainz@nrubsig.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +23,29 @@ Except as contained in this notice, the name of the X Consortium shall not be
 used in advertising or otherwise to promote the sale, use or other dealings
 in this Software without prior written authorization from the X Consortium.
  */
+#ifndef _XawInit_h
+#define _XawInit_h
+
+#include <X11/Intrinsic.h>
+#include <X11/Xfuncproto.h>
+
+/* Match classic libXaw7 so clients (e.g. xclock) detect pixmap converters. */
+#ifndef XawVendor
+#  define XawVendor XVENDORNAMESHORT
+#endif
+#ifndef XawVersion
+#  define XawVersion 7000002L
+#endif
+
+/* Match build-time Athena feature set for clients that only include XawInit.h */
+#ifndef XAW_INTERNATIONALIZATION
+#  define XAW_INTERNATIONALIZATION 1
+#endif
 
 _XFUNCPROTOBEGIN
 
 extern void XawInitializeWidgetSet(void); /* called from ClassInit procs */
 
 _XFUNCPROTOEND
+
+#endif /* _XawInit_h */

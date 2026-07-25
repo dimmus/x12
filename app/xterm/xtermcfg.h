@@ -76,13 +76,10 @@
 #define HAVE_LANGINFO_CODESET 1 /* AM_LANGINFO_CODESET */
 #define HAVE_LASTLOG_H        1  /* CF_LASTLOG */
 #define HAVE_LIBXPM           1  /* CF_WITH_XPM */
-/* #undef HAVE_LIB_NEXTAW */  /* CF_X_ATHENA(--with-neXtaw) */
 /* #undef HAVE_LIB_PCRE */  /* CF_WITH_PCRE */
 /* #undef HAVE_LIB_PCRE2 */  /* CF_WITH_PCRE2 */
-#define HAVE_LIB_XAW 1  /* CF_X_ATHENA */
-/* #define HAVE_LIB_XAW3D 1 */  /* CF_X_ATHENA(--with-Xaw3d) */
-/* #define HAVE_LIB_XAW3DXFT 1 */ /* CF_X_ATHENA(--with-Xaw3dxft) */
-/* #undef HAVE_LIB_XAWPLUS */  /* CF_X_ATHENA(--with-XawPlus) */
+#define HAVE_LIB_XAW 1       /* X12 unified Athena (Xaw3dxft as libXaw) */
+#define HAVE_LIB_XAW3DXFT 1  /* same library; enables Xaw3dXft UTF-8 path */
 #define HAVE_LIB_XCURSOR 1  /* AC_CHECK_LIB(Xcursor) */
 #define HAVE_MKDTEMP  /* AC_CHECK_FUNCS(mkdtemp) */
 #define HAVE_MKSTEMP  /* CF_MKSTEMP */

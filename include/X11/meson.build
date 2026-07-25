@@ -9,22 +9,19 @@ inc_lib += [
         'ICE',
         'SM',
         'Xaw',
-        'XawPlus',
+        'Xaw3dxft',
         'Xcursor',
         'Xft',
         'Xmu',
         'Xtrans',
-        'neXtaw',
     )
 ]
 
 subdir('dri')
 subdir('extensions')
 subdir('fonts')
-subdir('XawPlus')
-subdir('Xaw3d')
+# Unified Athena headers (implementation + X11/Xaw shims).
 subdir('Xaw3dxft')
-subdir('neXtaw')
 
 install_headers(
     'ap_keysym.h',
@@ -151,6 +148,7 @@ install_headers(
     subdir: 'X11/SM',
 )
 
+# X11/Xaw/*.h are shims → X11/Xaw3dxft (unified Athena / ADR-0020).
 install_headers(
     'Xaw/AllWidgets.h',
     'Xaw/AsciiSink.h',
@@ -172,6 +170,8 @@ install_headers(
     'Xaw/GripP.h',
     'Xaw/Label.h',
     'Xaw/LabelP.h',
+    'Xaw/Layout.h',
+    'Xaw/LayoutP.h',
     'Xaw/List.h',
     'Xaw/ListP.h',
     'Xaw/MenuButton.h',
@@ -201,9 +201,10 @@ install_headers(
     'Xaw/SmeBSBP.h',
     'Xaw/SmeLine.h',
     'Xaw/SmeLineP.h',
+    'Xaw/SmeThreeD.h',
+    'Xaw/SmeThreeDP.h',
     'Xaw/StripChart.h',
     'Xaw/StripCharP.h',
-    'Xaw/Template.c',
     'Xaw/Template.h',
     'Xaw/TemplateP.h',
     'Xaw/Text.h',
@@ -212,6 +213,8 @@ install_headers(
     'Xaw/TextSinkP.h',
     'Xaw/TextSrc.h',
     'Xaw/TextSrcP.h',
+    'Xaw/ThreeD.h',
+    'Xaw/ThreeDP.h',
     'Xaw/Tip.h',
     'Xaw/TipP.h',
     'Xaw/Toggle.h',
@@ -221,6 +224,9 @@ install_headers(
     'Xaw/VendorEP.h',
     'Xaw/Viewport.h',
     'Xaw/ViewportP.h',
+    'Xaw/Xaw3dP.h',
+    'Xaw/Xaw3dXft.h',
+    'Xaw/Xaw3dXftP.h',
     'Xaw/XawImP.h',
     'Xaw/XawInit.h',
     subdir: 'X11/Xaw',

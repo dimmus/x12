@@ -32,11 +32,23 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <X11/IntrinsicP.h>
 
-/* These are set during the build to reflect capability and options. */
-/* I18n support */
-/* XPM support */
-/* gray stipples */
-/* arrow scrollbars */
+/*
+ * X12 unified libXaw always builds with these features. Expose them in the
+ * public header path so clients (e.g. xfontsel) see matching widget structs
+ * without including the build-tree config.h.
+ */
+#ifndef XAW_INTERNATIONALIZATION
+#  define XAW_INTERNATIONALIZATION 1
+#endif
+#ifndef XAW_ARROW_SCROLLBARS
+#  define XAW_ARROW_SCROLLBARS 1
+#endif
+#ifndef XAW_MULTIPLANE_PIXMAPS
+#  define XAW_MULTIPLANE_PIXMAPS 1
+#endif
+#ifndef XAW_GRAY_BLKWHT_STIPPLES
+#  define XAW_GRAY_BLKWHT_STIPPLES 1
+#endif
 
 #ifndef XtX
 #  define XtX(w) (((RectObj)w)->rectangle.x)
