@@ -82,11 +82,9 @@ X12 ships a **single** Athena library: **Xaw3dxft** built as **`libXaw`**
 (ADR-0020). It is based on Xaw3d with FreeType/Xft and UTF-8. Include either
 `<X11/Xaw/...>` (compat shims) or `<X11/Xaw3dxft/...>`.
 
-Historical forks (classic libXaw, Xaw3d, XawPlus, neXtaw, XawM) remain under
-`lib/src/` for reference but are not built.
-
 Upstream lineage: https://gitlab.freedesktop.org/xorg/lib/libXaw3d (Xaw3d)
-plus Xaw3dxft FreeType extensions.
+plus Xaw3dxft FreeType extensions. Classic Xaw / Xaw3d / XawPlus / neXtaw /
+XawM / Mowitz forks were removed from the tree.
 
 ### Examples
 
@@ -299,11 +297,6 @@ The code base of `libxcvt` is identical to `xf86CVTMode()` therefore
 all credits for `libxcvt` go to the author (Luc Verhaegen) and
 contributors of `xf86CVTMode()` and the `cvt` utility as found in the
 [xserver](https://gitlab.freedesktop.org/xorg/xserver/) repository.
-
-## Xaw3d / XawPlus / neXtaw (legacy, not built)
-
-Superseded by the unified `libXaw` (Xaw3dxft) — see ADR-0020. Sources remain
-under `lib/src/xaw3d`, `xawplus`, `nextaw`, `xaw3dm` for reference only.
 
 ## Xft - X FreeType library
 

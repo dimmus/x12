@@ -14,8 +14,6 @@ subdir('ext' / 'xext')
 subdir('src' / 'xpm')     # <- ext/xext
 subdir('src' / 'xmu')     # <- ext/xext
 # Unified Athena: Xaw3dxft sources built as libXaw (ADR-0020).
-# Historical forks kept in-tree for reference but not built:
-#   src/xaw (classic), src/xaw3d, src/xawplus, src/nextaw, src/xaw3dm, src/mowitz
 subdir('src' / 'xaw3dxft')
 subdir('ext' / 'xrandr')
 subdir('ext' / 'xdamage')

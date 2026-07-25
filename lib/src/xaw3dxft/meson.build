@@ -1,5 +1,4 @@
-# X12 unified Athena widget set: Xaw3dxft built as libXaw.
-# Other historical forks (classic Xaw, Xaw3d, XawPlus, neXtaw, XawM) are not built.
+# X12 unified Athena widget set: Xaw3dxft built as libXaw (ADR-0020).
 
 h_check += ['wctype.h', 'wchar.h', 'widec.h']
 f_check += 'iswspace'
@@ -88,9 +87,6 @@ libxaw = declare_dependency(
   link_with: lib,
   include_directories: inc_lib,
 )
-
-# Aliases for any leftover references
-libxaw3dxft = libxaw
 
 pkg.generate(lib,
   description: 'X Athena Widgets Library (unified Xaw3dxft / Xft)',

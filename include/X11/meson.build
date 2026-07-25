@@ -20,7 +20,7 @@ inc_lib += [
 subdir('dri')
 subdir('extensions')
 subdir('fonts')
-# Unified Athena headers (implementation + X11/Xaw shims). Legacy XawPlus/Xaw3d/neXtaw not installed.
+# Unified Athena headers (implementation + X11/Xaw shims).
 subdir('Xaw3dxft')
 
 install_headers(

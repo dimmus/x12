@@ -89,17 +89,7 @@
 
 #if OPT_INPUT_METHOD
 
-#  if defined(HAVE_LIB_XAW)
-#    include "X11/Xaw/XawImP.h"
-#  elif defined(HAVE_LIB_XAW3D)
-#    include "X11/Xaw3d/XawImP.h"
-#  elif defined(HAVE_LIB_XAW3DXFT)
-#    include "X11/Xaw3dxft/XawImP.h"
-#  elif defined(HAVE_LIB_NEXTAW)
-#    include "X11/neXtaw/XawImP.h"
-#  elif defined(HAVE_LIB_XAWPLUS)
-#    include "X11/XawPlus/XawImP.h"
-#  endif
+#  include "X11/Xaw/XawImP.h"
 
 #endif
 

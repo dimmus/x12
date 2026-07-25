@@ -272,10 +272,6 @@ if WITH_DEBUG
   conf.set('XTRANSDEBUG', '5') # level 1-5
   conf.set('XTRANSDEBUGTIMESTAMP', false)
 
-  # mowitz
-  conf.set('DEBUG_GEOM', true)
-  conf.set('DEBUG_TF', true)
-  
   conf.set('FONTDEBUG', true)
   conf.set('XNL_DEBUG', true)
   conf.set('DEBUG_WO_TIMERS', true)

@@ -56,17 +56,7 @@
 
 #include "X11/Xatom.h"
 
-#if defined(HAVE_LIB_XAW)
-#  include "X11/Xaw/Scrollbar.h"
-#elif defined(HAVE_LIB_XAW3D)
-#  include "X11/Xaw3d/Scrollbar.h"
-#elif defined(HAVE_LIB_XAW3DXFT)
-#  include "X11/Xaw3dxft/Scrollbar.h"
-#elif defined(HAVE_LIB_NEXTAW)
-#  include "X11/neXtaw/Scrollbar.h"
-#elif defined(HAVE_LIB_XAWPLUS)
-#  include "X11/XawPlus/Scrollbar.h"
-#endif
+#include "X11/Xaw/Scrollbar.h"
 
 #if defined(HAVE_XKBQUERYEXTENSION)
 #  include "X11/extensions/XKB.h"
