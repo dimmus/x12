@@ -157,7 +157,9 @@ dep_png          = dependency('libpng',         required: true ) # video/intel (
 dep_drm_intel    = dependency('libdrm_intel',   required: true ) # video/intel
 dep_drm_nouveau  = dependency('libdrm_nouveau', required: true ) # video/nouveau
 dep_drm_radeon   = dependency('libdrm_radeon',  required: true ) # video/ati
-dep_xa           = dependency('xatracker',      required: true ) # video/vmware
+# Mesa removed Gallium-XA (xatracker) in 25.2+; Arch/modern distros no longer ship it.
+# Only needed for the VMware video DDX — skip that driver when absent.
+dep_xa           = dependency('xatracker',      required: false) # video/vmware
 dep_valgrind     = dependency('valgrind',       required: get_option('valgrind')) # video/intel
 
 exe_bison        = find_program('bison',        required: false)
