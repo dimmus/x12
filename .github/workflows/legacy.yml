@@ -108,7 +108,8 @@ jobs:
           X12_BUILD_DIR: ${{ github.workspace }}/build-asan
           # Xvfb + in-tree libs are ASan-built; link smoke clients the same way.
           # Do not LD_PRELOAD globally — it breaks Xvfb/xkbcomp startup.
-          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          # detect_odr_violation=0: xkbcomp + libX11 both define XKB atom hooks
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1:detect_odr_violation=0
           CC: gcc
           CFLAGS: -fsanitize=address -fno-omit-frame-pointer
           LDFLAGS: -fsanitize=address
