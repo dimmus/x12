@@ -1,0 +1,39 @@
+#
+# This script gets sourced by every test to setup a common environment.
+#
+
+# Force all output to be standard english
+export LANG=C
+
+# Define the name of the authority file, which we use during test.
+export XAUTHORITY=${DATADIR:-/tmp}/.Xauthority
+
+# Start a new authority file
+rm -f $XAUTHORITY ; touch $XAUTHORITY
+
+# Prefer ../xauth (symlink next to tests/) so argv0 matches golden stderr.
+_XAUTH_TESTS_DIR=$(pwd)
+_XAUTH_WRAPPER="${_XAUTH_TESTS_DIR}/../xauth"
+_XAUTH_BUILD_BIN="${XAUTH_BIN:-${_XAUTH_TESTS_DIR}/../../../build/app/xauth/xauth}"
+if [ ! -e "$_XAUTH_WRAPPER" ] && [ -x "$_XAUTH_BUILD_BIN" ]; then
+  ln -sf "$_XAUTH_BUILD_BIN" "$_XAUTH_WRAPPER"
+fi
+if [ -x "$_XAUTH_WRAPPER" ]; then
+  _XAUTH_RUN=../xauth
+else
+  _XAUTH_RUN="$_XAUTH_BUILD_BIN"
+fi
+
+xauth()
+{
+  echo "> xauth" "$@"
+  $_XAUTH_RUN "$@"
+  echo "  exits with $?"
+}
+
+xauth_silent()
+{
+  echo "> xauth" "some silent commands which should not be logged..."
+  $_XAUTH_RUN "$@"
+  echo "  exits with $?"
+}

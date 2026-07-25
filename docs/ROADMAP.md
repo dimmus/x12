@@ -7,8 +7,8 @@
 ## Sequence
 
 ```text
-1. Import / vendor X11R8 baseline (meson tree, enough for Xvfb + xterm + legacy suite)
-2. Stand up CI: meson build + ./tests/legacy/run.sh (fail on corpus regress)
+1. [DONE] Import / vendor X11R8 baseline (meson tree, Xvfb + xterm + legacy suite)
+2. [DONE] Stand up CI: meson build + ./tests/legacy/run.sh (fail on corpus regress)
 3. Add hierarchical level assignment (auth token / CLI) + mediation hooks (XACE-style)
 4. Security test: sandbox client cannot keylog full/user client
 5. XML extension sketches: dmabuf surface + sync (XCB-style)
@@ -16,6 +16,14 @@
 7. Built-in compositor path sufficient for Xvfb + one Vulkan dmabuf client
 8. Tag G1 when demo script + legacy suite are green
 ```
+
+### Step 1 notes (2026-07-25)
+
+- Provenance: ADR-0008 / `docs/vendor/X11R8-README.md`
+- Legacy harness: `./tests/legacy/run.sh` (xauth + meson unit/server + x11perf + xcmstest + xterm)
+- CI: `.github/workflows/legacy.yml`
+- Workaround: Xvfb `-extension XFree86-Bigfont` until QueryFont/Bigfont is fixed
+
 
 ## Explicitly after G1
 

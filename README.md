@@ -1,42 +1,45 @@
 # x12
 
-Independent next-stage **X Window System** — protocol + server for the modern Linux desktop. Evolves the X11 wire in place (extensions), with hierarchical client security, a built-in compositor, and API-agnostic dmabuf surfaces.
+Independent next-stage **X Window System** — protocol + server for the modern Linux desktop.
+
+Baseline: vendored from [`dimmus/X11R8`](https://github.com/dimmus/X11R8) @ `9b6e8f9` (see [ADR-0008](docs/adr/0008-x11r8-baseline-import.md)).
 
 **Decision owner:** Dimmus  
-**License:** MIT/X11-style (see [`LICENSE`](LICENSE))
+**License:** MIT/X11-style ([`LICENSE`](LICENSE))
 
-## Locked strategy (2026-07-25)
+## Quick start
 
-| Pillar | Choice |
-|---|---|
-| Product | Protocol + server (not a DE) |
-| Wire | Native X11 + extensions in place; rebuild OK for native libs |
-| Security | Hierarchical `sandbox` / `user` / `full` (default **full**) |
-| Graphics | API-agnostic dmabuf; built-in compositor; NVIDIA proprietary paths OK |
-| HDR | v2 |
-| Scaling | Toolkit opt-in |
-| IDL / impl | XML (XCB-style); hybrid memory-safe front-end + C core |
-| Bindings | C/XCB first |
-| Remoting | Deferred |
-| Legacy gate | X11R8 meson / xauth / x11perf / xcmstest must pass |
+```sh
+# deps: see docs/BUILD.md
+meson setup build
+meson compile -C build
+./tests/legacy/run.sh          # must pass
+```
 
 ## G1 milestone
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
+Step 1 (this tree): X11R8 baseline imports, builds, and the legacy corpus gate is green.
+
+## Locked strategy
+
+| Pillar | Choice |
+|---|---|
+| Product | Protocol + server, modern Linux desktop, independent line |
+| Wire | Native X11 + extensions in place; rebuild OK |
+| Security | Hierarchical `sandbox` / `user` / `full` (default **full**) |
+| Graphics | API-agnostic dmabuf; built-in compositor; HDR v2 |
+| Legacy gate | X11R8 meson / xauth / x11perf / xcmstest |
+
 ## Docs
 
 | Document | Contents |
 |---|---|
-| [`docs/STRATEGY.md`](docs/STRATEGY.md) | Drawbacks, novel tech, locked pillars |
-| [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Questions + stakeholder answers |
-| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Decision index (ADR-0001…0007) |
+| [`docs/BUILD.md`](docs/BUILD.md) | Build & run instructions |
+| [`docs/STRATEGY.md`](docs/STRATEGY.md) | Drawbacks, novel tech, pillars |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Path to G1 |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | ADR index |
 | [`docs/LEGACY_TESTS.md`](docs/LEGACY_TESTS.md) | Legacy pass-through policy |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Engineering sequence toward G1 |
+| [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Stakeholder answers |
 | [`docs/adr/`](docs/adr/) | Architecture Decision Records |
-| [`tests/legacy/`](tests/legacy/) | Legacy suite harness contract |
-
-## Related repositories
-
-- [`dimmus/X11R8`](https://github.com/dimmus/X11R8) — legacy corpus + baseline lineage
-- [`dimmus/XCB`](https://github.com/dimmus/XCB) — XML/XCB binding style to continue

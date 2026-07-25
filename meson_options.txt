@@ -1,0 +1,167 @@
+## BUILD
+option('build-debug',           type: 'boolean', value: false) # x12: verbose DEBUG/XNL_DEBUG breaks Xt clients
+option('build-font-server',     type: 'boolean', value: true )
+option('build-input-evdev',     type: 'boolean', value: false) # replaced by libinput
+option('build-input-synaptics', type: 'boolean', value: false) # replaced by libinput
+option('build-video-intel',     type: 'boolean', value: true )
+option('build-static-epoxy',    type: 'boolean', value: true )
+option('build-static-pixman',   type: 'boolean', value: false)
+option('build-xproto-legacy',   type: 'boolean', value: false)
+option('build-demo',            type: 'boolean', value: true ) # x12: x11perf / xcmstest legacy corpus
+option('build-app',             type: 'boolean', value: true )
+option('build-test',            type: 'boolean', value: true ) # x12: server/lib meson tests + legacy gate
+option('build-doc',             type: 'boolean', value: false)
+
+## SETUP
+## lib
+option('xthreads',              type: 'boolean', value: true,                                        description: '[xau] Whether libXau should be compiled with thread support.')
+option('composecache',          type: 'boolean', value: true,                                        description: '[x11] Enable compose table cache support.')
+option('xkb',                   type: 'boolean', value: true,                                        description: '[x11] Enable XKB support *EXPERIMENTAL*.')
+option('xf86bigfont',           type: 'boolean', value: true,                                        description: '[x11] Enable XF86BigFont extension support.')
+option('xcms',                  type: 'boolean', value: true,                                        description: '[x11] Enable Xlib support for CMS *EXPERIMENTAL*.')
+option('xlocale',               type: 'boolean', value: true,                                        description: '[x11] Enable Xlib locale implementation *EXPERIMENTAL*.')
+option('zfile-open',            type: 'boolean', value: true,                                        description: '[xpm] Search for files with .Z & .gz extensions automatically.')
+option('zfile-stat',            type: 'boolean', value: true,                                        description: '[xpm] Search for files with .Z & .gz extensions automatically.')
+option('sxpm',                  type: 'boolean', value: true,                                        description: '[xpm] Build programm to show XPM files.')
+
+## xserver
+option('xnest',                 type: 'boolean', value: true,                                        description: 'Enable Xnest nested X server')
+option('xephyr',                type: 'boolean', value: true,                                        description: 'Enable Xephyr nested X server')
+option('xvfb',                  type: 'boolean', value: true,                                        description: 'Enable Xvfb X server')
+
+option('log_dir',               type: 'string')
+option('default_font_path',     type: 'string')
+option('serverconfigdir',       type: 'string',                                                      description: 'Miscellaneous server configuration files path. Default: $libdir/xorg')
+
+option('glx',                   type: 'boolean', value: true)
+option('dri2',                  type: 'boolean', value: true,                                        description: 'Build DRI2 extension (default: auto)')
+option('dri3',                  type: 'boolean', value: true,                                        description: 'Build DRI3 extension (default: auto)')
+option('libunwind',             type: 'boolean', value: true,                                        description: 'Use libunwind for backtrace reporting')
+option('ipv6',                  type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'])
+
+option('xkb_output_dir',        type: 'string')
+option('xkb_bin_dir',           type: 'string')
+option('xkb_data_dir',          type: 'string', value: '', description: 'XKB data root (default: $prefix/share/X11/xkb, or /usr/share/X11/xkb if present for uninstalled builds)')
+option('xkb_default_rules',     type: 'string', value: 'evdev')
+option('xkb_default_model',     type: 'string', value: 'pc105')
+option('xkb_default_layout',    type: 'string', value: 'us')
+option('xkb_default_variant',   type: 'string')
+option('xkb_default_options',   type: 'string')
+option('fallback_input_driver', type: 'string', value: 'auto')
+
+option('vendor_name',           type: 'string', value: 'X12 (Dimmus)')
+option('vendor_name_short',     type: 'string', value: 'X12')
+option('vendor_web',            type: 'string', value: 'https://github.com/dimmus/x12')
+
+option('dtrace',                type: 'boolean', value: false,  description: 'Enable dtrace hooks') # need dtrace
+
+option('listen_tcp',            type: 'boolean', value: true,   description: 'Listen on TCP by default')
+option('listen_unix',           type: 'boolean', value: true,   description: 'Listen on Unix by default')
+option('listen_local',          type: 'boolean', value: true,   description: 'Listen on local by default')
+
+option('pciaccess',             type: 'boolean', value: true,   description: 'Xorg pciaccess support')
+option('udev',                  type: 'boolean', value: true)
+option('udev_kms',              type: 'boolean', value: true)
+option('dpms',                  type: 'boolean', value: true,   description: 'Xorg DPMS extension')
+option('screensaver',           type: 'boolean', value: true,   description: 'ScreenSaver extension')
+option('xres',                  type: 'boolean', value: true,   description: 'XRes extension')
+option('xace',                  type: 'boolean', value: true,   description: 'X-ACE extension')
+option('xinerama',              type: 'boolean', value: true,   description: 'Xinerama extension')
+option('xcsecurity',            type: 'boolean', value: true,   description: 'Security extension')
+option('xv',                    type: 'boolean', value: true,   description: 'Xv extension')
+option('xvmc',                  type: 'boolean', value: true,   description: 'XvMC extension')
+option('linux_apm',             type: 'boolean', value: true,   description: 'APM support on Linux')
+option('linux_acpi',            type: 'boolean', value: true,   description: 'ACPI support on Linux')
+option('xf86-input-inputtest',  type: 'boolean', value: true,   description: 'Test input driver support on Xorg')
+option('suid_wrapper',          type: 'boolean', value: false,  description: 'SUID wrapper for legacy driver support')                                                                                                    
+option('int10',                 type: 'combo',   value: 'auto', choices: ['stub', 'x86emu', 'vm86', 'auto', 'false'], 
+                                                                                                      description: 'Xorg int10 backend (default: usually x86emu)')
+option('hal',                   type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'Enable HAL integration')
+option('systemd_notify',        type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'Enable systemd-notify support')
+option('systemd_logind',        type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'Enable systemd-logind integration')
+option('xselinux',              type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'XSELINUX extension')
+option('dga',                   type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'DGA extension')
+option('mitshm',                type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'SHM extension')
+option('agp',                   type: 'combo',   value: 'auto', choices: ['true', 'false', 'auto'],   description: 'AGP support')
+option('sha1',                  type: 'combo',   value: 'auto', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'libmd', 'libsha1', 'libnettle', 'libgcrypt', 'libcrypto', 'auto'], 
+                                                                                                      description: 'SHA1 implementation')
+option('vgahw',                 type: 'combo',   value: 'false', choices: ['true', 'false', 'auto'],   description: 'Xorg VGA access module')
+
+# xcb
+option('composite',             type: 'boolean', value: true)
+option('damage',                type: 'boolean', value: true)
+option('dbe',                   type: 'boolean', value: true)
+option('present',               type: 'boolean', value: true)
+option('randr',                 type: 'boolean', value: true)
+option('record',                type: 'boolean', value: true)
+option('render',                type: 'boolean', value: true)
+option('resource',              type: 'boolean', value: true)
+option('shape',                 type: 'boolean', value: true)
+option('shm',                   type: 'boolean', value: true)
+option('sync',                  type: 'boolean', value: true)
+option('xevie',                 type: 'boolean', value: true)
+option('xfree86_dri',           type: 'boolean', value: true)
+option('xfixes',                type: 'boolean', value: true)
+option('xinput',                type: 'boolean', value: true)
+option('xprint',                type: 'boolean', value: true)
+option('selinux',               type: 'boolean', value: true)
+option('xtest',                 type: 'boolean', value: true)
+option('ge',                    type: 'boolean', value: true)
+
+## doc 
+option('build-doc-guide',       type: 'boolean', value: false,   description: 'Build development guides')
+option('build-doc-pdf',         type: 'boolean', value: false,   description: 'Build documentation as pdf files')
+option('build-doc-man',         type: 'boolean', value: true,    description: 'Build manual pages')
+
+## app
+option('xli',                   type: 'boolean', value: false)
+option('xbindkeys',             type: 'boolean', value: true)
+
+## demo
+option('demo-x11perf',          type: 'boolean', value: true )
+option('demo-xcmstest',         type: 'boolean', value: true ) # x12 legacy corpus
+option('demo-ico',              type: 'boolean', value: true )
+option('demo-maze',             type: 'boolean', value: true )
+option('demo-puzzle',           type: 'boolean', value: true )
+option('demo-xeyes',            type: 'boolean', value: true )
+option('demo-xgamma',           type: 'boolean', value: true )
+option('demo-xev',              type: 'boolean', value: true )
+option('demo-xgas',             type: 'boolean', value: false) # legacy
+option('demo-xgc',              type: 'boolean', value: true )
+
+## static/epoxy
+option('egl',                   type: 'boolean', value: true)
+
+## static/pixman
+option('loongson-mmi',          type: 'feature',                 description: 'Use Loongson MMI intrinsic optimized paths')
+option('mmx',                   type: 'feature',                 description: 'Use X86 MMX intrinsic optimized paths')
+option('sse2',                  type: 'feature',                 description: 'Use X86 SSE2 intrinsic optimized paths')
+option('ssse3',                 type: 'feature',                 description: 'Use X86 SSSE3 intrinsic optimized paths')
+option('vmx',                   type: 'feature',                 description: 'Use PPC VMX/Altivec intrinsic optimized paths')
+option('arm-simd',              type: 'feature',                 description: 'Use ARMv6 SIMD intrinsic optimized paths')
+option('neon',                  type: 'feature',                 description: 'Use ARM NEON intrinsic optimized paths')
+option('a64-neon',              type: 'feature',                 description: 'Use ARM A64 NEON intrinsic optimized paths')
+option('mips-dspr2',            type: 'feature',                 description: 'Use MIPS32 DSPr2 intrinsic optimized paths')
+option('rvv',                   type: 'feature',                 description: 'Use RISC-V Vector extension')
+option('gnu-inline-asm',        type: 'feature',                 description: 'Use GNU style inline assembler')
+option('tls',                   type: 'feature',                 description: 'Use compiler support for thread-local storage')
+option('openmp',                type: 'feature',                 description: 'Enable OpenMP')
+option('cpu-features-path',     type: 'string',                  description: 'Path to platform-specific cpu-features.[ch] for systems that do not provide it (e.g. Android)')
+option('timers',                type: 'boolean', value: false,   description: 'Enable TIMER_* macros')
+
+##  driver/video/intel
+option('sna',                   type: 'boolean', value: false,   description: 'Build with SNA support')
+option('uxa',                   type: 'boolean', value: false,   description: 'Build with UXA support')
+option('xaa',                   type: 'boolean', value: false,   description: 'Build with XAA support')
+option('ums',                   type: 'boolean', value: false,   description: 'Build with UMS support')
+option('kms',                   type: 'boolean', value: true,    description: 'Build with KMS support')
+option('valgrind',              type: 'boolean', value: false,   description: 'Enable valgrindified ioctls for debugging')
+option('tools',                 type: 'boolean', value: true,    description: 'Enable building and installing the miscellaneous tools')
+option('backlight',             type: 'boolean', value: true,    description: 'Enable control of the backlight')
+option('backlight-helper',      type: 'boolean', value: true,    description: 'Enable building the backlight helper executable for running X under a normal user')
+option('tearfree',              type: 'boolean', value: false,   description: 'Enable use of TearFree by default')
+option('use-create2',           type: 'boolean', value: false,   description: 'Enable use of create2 ioctl (experimental)')
+option('async-swap',            type: 'boolean', value: false,   description: 'Enable use of asynchronous swaps (experimental)')
+option('default-dri',           type: 'combo',   value: '3',     choices: [ '2', '3' ],                                 description : 'Select the default maximum DRI level')
+option('default-accel',         type: 'combo',   value: 'none',  choices: [ 'sna', 'uxa', 'none' ],                     description : 'Select the default acceleration method')
+option('internal-debug',        type: 'combo',   value: 'no',    choices: [ 'no', 'sync', 'memory', 'pixmap', 'full' ], description : 'Enable internal debugging')
