@@ -26,6 +26,8 @@ in this Software without prior written authorization from the X Consortium.
 #ifndef _Xaw_Reports_h
 #define _Xaw_Reports_h
 
+#include <X11/Intrinsic.h>
+
 /*
  * XawPannerReport - this structure is used by the reportCallback of the
  * Panner, Porthole, Viewport, and Scrollbar widgets to report its position.
