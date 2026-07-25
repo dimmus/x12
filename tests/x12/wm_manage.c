@@ -1,5 +1,5 @@
 /*
- * X12 xwm smoke: prove a twm-class WM manages a mapped client (reparent).
+ * X12 xwm smoke: prove the reference WM manages a mapped client (reparent).
  * DISPLAY must already point at a server where xwm is running.
  */
 #include <X11/Xlib.h>
@@ -66,7 +66,7 @@ main(void)
     if (parent == None || parent == root) {
         XDestroyWindow(dpy, win);
         XCloseDisplay(dpy);
-        return fail("window not reparented (is xwm/twm running?)");
+        return fail("window not reparented (is xwm running?)");
     }
 
     wm_state = XInternAtom(dpy, "WM_STATE", False);
