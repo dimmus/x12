@@ -23,7 +23,7 @@ Modern Linux desktops need client-allocated buffers, atomic KMS, explicit sync, 
 ## Consequences
 
 - Built-in compositor is part of the server deliverable for G1+ (at least Xvfb-quality composition, then real KMS).
-- Protocol extensions expose dmabuf import/export, modifiers, and sync objects via XML/XCB codegen (ADR-0006).
+- Protocol extensions expose dmabuf import/export, modifiers, and sync objects via XML/XCB codegen (ADR-0006); native IDL is **X12-SURFACE** (ADR-0010).
 - Toolkit work (EFL/Motif/etc.) is outside X12 proper but required for scaling opt-in to matter on the desktop.
 
 ## Alternatives

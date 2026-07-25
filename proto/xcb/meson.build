@@ -12,6 +12,7 @@ src = [
   'ge',
   'glx',
   'present',
+  'x12_surface',
   'randr',
   'record',
   'render',

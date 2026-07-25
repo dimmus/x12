@@ -24,6 +24,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0007](adr/0007-milestone-governance-scope.md) | G1 milestone, owner, deferred remoting | **Accepted** | 2026-07-25 | Owner: Dimmus; E* skipped |
 | [ADR-0008](adr/0008-x11r8-baseline-import.md) | Vendor-copy X11R8 baseline | **Accepted** | 2026-07-25 | SHA `9b6e8f9`; ROADMAP step 1 |
 | [ADR-0009](adr/0009-meson-options-and-x12level.md) | meson.options + X12-LEVEL | **Accepted** | 2026-07-25 | Meson ≥1.1; deny-keylog G1 |
+| [ADR-0010](adr/0010-x12-surface-protocol.md) | X12-SURFACE dmabuf + sync IDL | **Accepted** | 2026-07-25 | ROADMAP step 5; server in step 7 |
 
 ---
 
@@ -46,6 +47,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-13 | License MIT/X11-style; decision owner Dimmus |
 | D-ACC-14 | Non-goals: not Wayland compositor; no XWayland/XWin/XQuartz; not a DE; no obscure-extension guarantee |
 | D-ACC-15 | Remoting deferred (E skipped) |
+| D-ACC-16 | Native surfaces = `X12-SURFACE` XML (dmabuf/fourcc/modifier/syncobj); DRI3/Present kept for legacy |
 
 ---
 
@@ -55,7 +57,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 |---|---|
 | Memory-safe front-end language (Rust vs Zig vs other) | Follow-up ADR when spike completes |
 | Exact hierarchical request matrix | Security extension protocol ADR |
-| X11R8 tree import/vendor strategy (submodule vs copy) | Implementation PR + short ADR if needed |
+| Built-in compositor + Vulkan client on X12-SURFACE | ROADMAP steps 6–7 |
 | Remoting | Only if Dimmus reopens E* with a new ADR |
 
 ---
@@ -68,3 +70,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Answers in `QUESTIONS.md` | Promoted ADR-0002/0003/0005; added ADR-0006/0007; locked D-ACC-3…15 |
 | 2026-07-25 | Implementation start | ADR-0008; X11R8 tree imported; legacy suite + CI green |
 | 2026-07-25 | Meson + levels | ADR-0009; `meson.options`; X12-LEVEL; deny_keylog test |
+| 2026-07-25 | Surface IDL | ADR-0010; `x12_surface.xml`; ROADMAP step 5 |

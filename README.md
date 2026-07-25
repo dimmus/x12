@@ -20,7 +20,7 @@ meson compile -C build
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Progress: baseline builds + legacy gate + **X12-LEVEL** hierarchical security (deny-keylog test green). Remaining: dmabuf/Vulkan client path.
+Progress: baseline + legacy gate + X12-LEVEL (deny-keylog) + **X12-SURFACE** IDL. Remaining: safe front-end, compositor, Vulkan client.
 
 Build uses **`meson.options`** (Meson ≥ 1.1).
 

@@ -45,7 +45,7 @@ Any authenticated client can, by default: keylog, inject input, read other windo
 
 Core protocol still encodes a server that owns much of the rendering story. Even with DRI3/Present/Glamor, the architecture pays for extra round-trips and copies compared with compositor-owned scanout.
 
-**Direction (locked):** API-agnostic dmabuf surfaces; **built-in compositor** mandatory; Present-like feedback via in-place X11 extensions (ADR-0005).
+**Direction (locked):** API-agnostic dmabuf surfaces; **built-in compositor** mandatory; Present-like feedback via in-place X11 extensions (ADR-0005). Native IDL: **X12-SURFACE** (`proto/xcb/src/x12_surface.xml`, ADR-0010).
 
 ### D3 — Implicit synchronization & tear / stutter (High)
 
