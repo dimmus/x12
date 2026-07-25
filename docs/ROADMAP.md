@@ -12,7 +12,7 @@
 3. [DONE] Hierarchical level assignment (CLI) + XACE mediation (X12-LEVEL)
 4. [DONE] Security test: sandbox client cannot keylog (QueryKeymap scrubbed)
 5. [DONE] XML extension sketches: dmabuf surface + sync (XCB-style) — `X12-SURFACE`
-6. Memory-safe protocol front-end spike (language ADR) wrapping decode/validate
+6. [DONE] Memory-safe protocol front-end spike (Rust / ADR-0011) for X12-SURFACE decode/validate
 7. Built-in compositor path sufficient for Xvfb + one Vulkan dmabuf client
 8. Tag G1 when demo script + legacy suite are green
 ```
@@ -24,6 +24,7 @@
 - Legacy harness: `./tests/legacy/run.sh` (+ `tests/security/run_deny_keylog.sh`)
 - Levels: `-client-level`, `-sandbox-clients` (see `docs/BUILD.md`)
 - Surfaces: `proto/xcb/src/x12_surface.xml` (ADR-0010, `docs/X12_SURFACE.md`)
+- Safe front-end: `safe/x12-proto` (ADR-0011, `docs/SAFE_PROTO.md`); `./tests/safe_proto/run.sh`
 - Workaround: Xvfb `-extension XFree86-Bigfont` until QueryFont/Bigfont is fixed
 
 

@@ -33,6 +33,7 @@ Important defaults for uninstalled/CI runs:
 | `xkb_output_dir` | `/tmp/x12-xkb` |
 | `build-debug` | `false` (verbose DEBUG/XNL_DEBUG breaks Xt clients) |
 | `build-test` / `build-demo` / `demo-xcmstest` | `true` (legacy corpus) |
+| `build-safe-proto` | `true` (registers `meson test safe-proto` when `cargo` exists) |
 
 ## Legacy gate
 
@@ -41,6 +42,14 @@ Important defaults for uninstalled/CI runs:
 ```
 
 Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`. Also runs `tests/security/run_deny_keylog.sh`.
+
+## Safe protocol front-end
+
+```sh
+./tests/safe_proto/run.sh
+```
+
+Rust crate `safe/x12-proto` (ADR-0011). Needs `cargo` on `PATH`.
 
 ## Hierarchical levels (XACE)
 

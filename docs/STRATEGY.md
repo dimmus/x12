@@ -138,7 +138,7 @@ See [DECISIONS.md](DECISIONS.md) and [adr/](adr/).
 1. **Native X11 wire, extensions in place** — rebuild OK for native libs (ADR-0002).
 2. **Hierarchical security** — sandbox / user / full; default **full**; multi-channel grants (ADR-0003).
 3. **API-agnostic dmabuf + built-in compositor** — explicit sync; proprietary NVIDIA paths supported (ADR-0005).
-4. **XML/XCB IDL + hybrid impl** — memory-safe protocol front-end, C core (ADR-0006).
+4. **XML/XCB IDL + hybrid impl** — Rust protocol front-end (`safe/x12-proto`, ADR-0011), C core (ADR-0006).
 5. **Legacy test gate** — X11R8 meson / xauth / x11perf / xcmstest (ADR-0004).
 6. **Local desktop first** — remoting deferred (ADR-0007).
 
