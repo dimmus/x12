@@ -20,7 +20,7 @@ meson compile -C build
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Progress: baseline + X12-LEVEL + X12-SURFACE IDL/stub + Rust decode linked into Xvfb. Remaining: compositor + Vulkan client (G1).
+Progress: G1 path complete except final tag — Xvfb compositor + lavapipe Vulkan Present demo green with legacy suite.
 
 Build uses **`meson.options`** (Meson ≥ 1.1).
 

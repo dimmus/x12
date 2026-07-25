@@ -48,10 +48,12 @@ Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`. Also runs `tests
 ```sh
 ./tests/safe_proto/run.sh              # cargo test + IDL drift gate
 ./tests/surface/run_query_version.sh   # live QueryVersion against Xvfb
+./tests/surface/run_vk_present.sh      # lavapipe → Present (needs mesa-vulkan-drivers)
 ```
 
 Rust crate `safe/x12-proto` (ADR-0011/0012). Needs `cargo` on `PATH` so meson can
-build `libx12_proto.a` and enable `X12SURFACE` in the server.
+build `libx12_proto.a` and enable `X12SURFACE` in the server. Vulkan demo uses
+`VK_ICD_FILENAMES` pointing at lavapipe (`lvp_icd.json`).
 
 ## Hierarchical levels (XACE)
 

@@ -27,6 +27,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0010](adr/0010-x12-surface-protocol.md) | X12-SURFACE dmabuf + sync IDL | **Accepted** | 2026-07-25 | ROADMAP step 5; server in step 7 |
 | [ADR-0011](adr/0011-rust-protocol-frontend.md) | Rust protocol front-end | **Accepted** | 2026-07-25 | ROADMAP step 6; `safe/x12-proto` |
 | [ADR-0012](adr/0012-surface-stub-and-safe-link.md) | Surface stub + linked Rust decode | **Accepted** | 2026-07-25 | Pre–step 7; QueryVersion live |
+| [ADR-0013](adr/0013-xvfb-compositor-vulkan.md) | Xvfb compositor + Vulkan client | **Accepted** | 2026-07-25 | ROADMAP step 7; lavapipe/memfd |
 
 ---
 
@@ -51,7 +52,8 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-15 | Remoting deferred (E skipped) |
 | D-ACC-16 | Native surfaces = `X12-SURFACE` XML (dmabuf/fourcc/modifier/syncobj); DRI3/Present kept for legacy |
 | D-ACC-17 | Protocol front-end language = **Rust** (`safe/x12-proto`); C ABI for dix hookup |
-| D-ACC-18 | X12-SURFACE requests decode-first via linked Rust; QueryVersion stub live; other ops BadImplementation until compositor |
+| D-ACC-18 | X12-SURFACE requests decode-first via linked Rust; QueryVersion live |
+| D-ACC-19 | Xvfb Present = mmap LINEAR + CopyArea; Vulkan client via lavapipe→memfd (G1); Syncobj still BadImplementation |
 
 ---
 
@@ -60,7 +62,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | Topic | Next artifact |
 |---|---|
 | Exact hierarchical request matrix | Security extension protocol ADR |
-| Compositor + Vulkan client on X12-SURFACE | ROADMAP step 7 |
+| KMS/GBM dmabuf import (non-Xvfb) | Post-G1 desktop bring-up |
 | XML→Rust codec codegen | Follow-up when hand validators grow costly |
 | Remoting | Only if Dimmus reopens E* with a new ADR |
 
@@ -77,3 +79,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Surface IDL | ADR-0010; `x12_surface.xml`; ROADMAP step 5 |
 | 2026-07-25 | Safe front-end | ADR-0011; Rust `safe/x12-proto`; ROADMAP step 6 |
 | 2026-07-25 | Step 7 prep | ADR-0012; ABI out-struct; X12-SURFACE stub; drift + QueryVersion smoke |
+| 2026-07-25 | Compositor + Vulkan | ADR-0013; mmap Present; lavapipe vk_present demo |

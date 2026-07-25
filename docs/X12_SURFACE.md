@@ -48,8 +48,9 @@ QueryVersion → QueryCapabilities → QueryModifiers(format)
 | XML IDL + meson/automake list | This step (ROADMAP 5) |
 | Generated C/XCB bindings | `include/xcb/x12_surface.h`, `lib/xcb/proto/x12_surface.c` |
 | Memory-safe decode front-end | Done — `safe/x12-proto` (ADR-0011/0012) |
-| Server stub (QueryVersion + decode-first) | Done — `server/Xext/x12surface.c` |
-| Built-in compositor + Vulkan sample | Step 7 |
+| Server decode-first + QueryVersion | Done — `server/Xext/x12surface.c` |
+| Xvfb compositor (mmap + CopyArea Present) | Done — ADR-0013 |
+| Vulkan sample client | Done — `tests/surface/vk_present.c` / `run_vk_present.sh` |
 
 ## Validation
 
