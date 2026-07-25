@@ -1,7 +1,8 @@
 # Legacy Test Pass-Through Policy
 
-**Status:** Accepted (stakeholder-stated hard constraint)  
-**Related ADR:** [adr/0004-legacy-test-gate.md](adr/0004-legacy-test-gate.md)
+**Status:** Accepted  
+**Related ADR:** [adr/0004-legacy-test-gate.md](adr/0004-legacy-test-gate.md)  
+**Corpus locked by:** QUESTIONS B1, B2 (2026-07-25)
 
 ## Rule
 
@@ -12,49 +13,45 @@
 
 1. Legacy tests remain executable in CI and locally.
 2. Failures block merge (non-optional).
-3. Removals or skips require an explicit ADR + replacement coverage.
+3. Removals or skips require an explicit ADR + Dimmus acknowledgment in [DECISIONS.md](DECISIONS.md).
 4. New X12 features must not break X11-compatible behavior covered by the corpus.
 
-## In-scope corpus (initial — refine via QUESTIONS B2)
+## In-scope corpus (locked)
 
-Until stakeholder answers finalize the list, treat these as **must-not-regress** sources from the org lineage:
+From `dimmus/X11R8` only:
 
-| Source | Examples | Import plan |
-|---|---|---|
-| `dimmus/X11R8` | `app/xauth/tests/*`, x11perf harness pieces, xcmstest, server smoke | Vendor or submodule + wrapper in `tests/legacy/` |
-| `dimmus/XCB` | XCB protocol / binding tests as available | Wire into meson test target |
-| Core protocol smoke | Xvfb start, create window, MapWindow, basic events | `tests/legacy/smoke/` |
-| Selected apps | `xterm` / `xclock` / `twm` bring-up under Xvfb | scripted smoke |
+| Component | Examples |
+|---|---|
+| Meson test suite | Targets defined by X11R8 `meson.build` / test harness |
+| xauth scripts | `app/xauth/tests/*` |
+| x11perf | `demo/x11perf` harness / do_tests |
+| xcmstest | `demo/xcmstest` |
 
-Out of scope by default (aligned with X11R8 “Changes from mainstream” unless QUESTIONS reopen them):
+Import plan: vendor or submodule X11R8 pieces under `tests/legacy/` (or run against an X11R8 checkout) and wrap with `./tests/legacy/run.sh`.
 
-- XWayland suites
-- XWin / XQuartz
-- Distro-specific packaging tests
+## Out of scope (unless a future ADR adds them)
+
+- XCB standalone unit suites (not selected in B2)
+- Motif / EFL / Window Maker smoke tests
+- XWayland, XWin, XQuartz
+- Distro packaging tests
+- Obscure historical extension conformance beyond what X11R8 already runs (H5)
 
 ## CI expectations
 
 ```text
 meson test -C build --suite legacy
+# or
+./tests/legacy/run.sh
 ```
 
-- Run under Xvfb (or Xephyr where needed).
-- ASAN/UBSAN jobs are advisory at first, then gating once green baseline exists.
-- Flaky tests must be fixed or quarantined with an issue link; silent skip is forbidden.
-
-## Changing the corpus
-
-Allowed only when:
-
-1. An ADR documents why a test is obsolete under X12, and
-2. Equivalent assurance exists (new test or narrowed assertion), and
-3. Stakeholder approval is recorded in [DECISIONS.md](DECISIONS.md).
+- Prefer Xvfb for headless CI (aligns with G1).
+- ASAN/UBSAN advisory until a green baseline exists, then gate.
+- Silent skips forbidden; quarantines need an issue link.
 
 ## Local developer workflow (target)
 
 ```sh
-./tests/legacy/run.sh          # wrapper — to be implemented with server code
+./tests/legacy/run.sh
 meson test -C build --suite legacy
 ```
-
-Placeholder layout lives under `tests/legacy/` so the policy is enforceable as soon as the server tree lands.

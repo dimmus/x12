@@ -1,32 +1,35 @@
-# ADR-0002: Compatibility-first evolution
+# ADR-0002: Compatibility-first evolution (native X11 wire)
 
 ## Status
 
-Provisional — 2026-07-25 (awaiting QUESTIONS B3, B4, A1)
+Accepted — 2026-07-25 (QUESTIONS A1, A3, B3, B4, H1–H5)
 
 ## Context
 
-The org already maintains `X11R8`, `XCB`, Motif, EFL, Window Maker, CDE. A greenfield break would orphan that stack. Stakeholder requires legacy tests to keep passing.
+The org maintains `X11R8`, `XCB`, Motif, EFL, Window Maker, CDE. Stakeholder requires the X11R8 legacy corpus to keep passing. Product identity is an X Window System successor, not a Wayland compositor.
 
-## Decision (provisional)
+## Decision
 
-1. X12 development proceeds as an **evolution** of the X Window System, not a Wayland reimplementation.
-2. Existing X11 clients and the X11R8-derived test corpus remain supported.
-3. New X12 capabilities (buffers, HDR, capabilities) are additive; legacy paths stay until tests and ADR retire them.
-4. Prefer dual-path server internals: **legacy protocol engine** + **native X12 surface/capability engine**, sharing DRM/KMS backend.
+1. X12 is a **protocol + server** successor (A1=a). Other WMs/toolkits adopt it; X12 is not a full desktop environment (H4).
+2. Development is an **independent** `dimmus/x12` line (A3).
+3. The server **speaks the X11 protocol natively**; new features land as **extensions that evolve in place** (B3=a). No separate translator shim and no dual-socket protocol split.
+4. **Rebuild** against new X12 client libraries is acceptable for native features (B4). Unchanged binary ABI for every historical Xlib build is not a hard requirement.
+5. Designated X11R8 legacy tests remain green (B1, B2; ADR-0004).
+6. Non-goals confirmed (H1–H5): not a Wayland compositor; no XWayland; no XWin/XQuartz in v1; not a DE; no guarantee for every obscure historical extension.
 
 ## Consequences
 
-- Slower pure elegance; higher adoption chance for Motif/EFL/WMs.
-- Protocol IDL must describe both legacy and native messages.
-- Security model must apply to legacy clients without requiring immediate porting (via namespaces/capabilities at connection time).
+- Protocol IDL (XML/XCB-style, ADR-0006) describes core + extensions on the X11 wire family.
+- Security and buffer APIs are additive extensions, mediated for rebuilt and legacy-path clients.
+- Independence means we may study XLibre/X.Org technically but do not depend on their project governance.
 
 ## Alternatives
 
-- Hard cut to new protocol only — rejected under legacy-test constraint.
-- Wayland compositor + XWayland — rejected as product identity (X11R8 already drops XWayland).
+- Dual-protocol sockets or external shim — rejected (B3).
+- Wayland + XWayland — rejected (H1, H2).
+- Binary-only forever without rebuild — rejected (B4).
 
 ## References
 
-- `dimmus/X11R8` README: monolithic, no XWayland/XWin/XQuartz
+- `docs/QUESTIONS.md` Answers 2026-07-25
 - `docs/LEGACY_TESTS.md`

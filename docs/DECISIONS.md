@@ -1,14 +1,13 @@
 # X12 Decision Log
 
 All architecture and process decisions for `dimmus/x12`.  
-Detailed records live in [`adr/`](adr/). Strategy analysis: [`STRATEGY.md`](STRATEGY.md). Open questions: [`QUESTIONS.md`](QUESTIONS.md).
+Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md). Answers: [`QUESTIONS.md`](QUESTIONS.md).
 
 ## How to add a decision
 
 1. Copy the ADR pattern from `adr/0001-record-architecture-decisions.md`.
 2. Add a row below.
-3. Link related QUESTION ids when Provisional.
-4. On stakeholder answer, set Status → Accepted and note date + summary.
+3. Status changes that alter Accepted architecture require **Dimmus** acknowledgment (ADR-0007).
 
 ---
 
@@ -17,52 +16,45 @@ Detailed records live in [`adr/`](adr/). Strategy analysis: [`STRATEGY.md`](STRA
 | ID | Title | Status | Date | Notes |
 |---|---|---|---|---|
 | [ADR-0001](adr/0001-record-architecture-decisions.md) | Record architecture decisions | **Accepted** | 2026-07-25 | ADR process mandatory |
-| [ADR-0002](adr/0002-compatibility-first.md) | Compatibility-first evolution | Provisional | 2026-07-25 | Awaiting A1, B3, B4 |
-| [ADR-0003](adr/0003-capability-security-model.md) | Capability / hierarchical security | Provisional | 2026-07-25 | Awaiting C1–C5 |
-| [ADR-0004](adr/0004-legacy-test-gate.md) | Legacy test gate | **Accepted** | 2026-07-25 | Stakeholder hard constraint |
-| [ADR-0005](adr/0005-rendering-and-sync.md) | Rendering path and sync | Provisional | 2026-07-25 | Awaiting D1–D5 |
+| [ADR-0002](adr/0002-compatibility-first.md) | Native X11 wire, independent line | **Accepted** | 2026-07-25 | A1=a, A3, B3=a, B4 rebuild, H1–H5 |
+| [ADR-0003](adr/0003-capability-security-model.md) | Hierarchical security (sandbox/user/full) | **Accepted** | 2026-07-25 | Default **full**; grants via all channels |
+| [ADR-0004](adr/0004-legacy-test-gate.md) | Legacy test gate | **Accepted** | 2026-07-25 | X11R8 corpus (B2) |
+| [ADR-0005](adr/0005-rendering-and-sync.md) | dmabuf + built-in compositor | **Accepted** | 2026-07-25 | HDR v2; toolkit opt-in scale; NVIDIA proprietary OK |
+| [ADR-0006](adr/0006-protocol-and-implementation.md) | XML/XCB IDL + hybrid C/safe front-end | **Accepted** | 2026-07-25 | Bindings: C/XCB first; MIT/X11 license |
+| [ADR-0007](adr/0007-milestone-governance-scope.md) | G1 milestone, owner, deferred remoting | **Accepted** | 2026-07-25 | Owner: Dimmus; E* skipped |
 
 ---
 
 ## Accepted decisions (summary)
 
-### D-ACC-1 — Document everything (ADR-0001)
-
-Architecture choices are written as ADRs in-tree; chat is not authoritative.
-
-### D-ACC-2 — Legacy tests are a merge gate (ADR-0004)
-
-All designated legacy tests must pass. Removals need ADR + explicit approval. Policy text: [`LEGACY_TESTS.md`](LEGACY_TESTS.md).
-
-### D-ACC-3 — Analysis baseline frozen for review (2026-07-25)
-
-[`STRATEGY.md`](STRATEGY.md) captures drawbacks D1–D12 and the novel-tech inventory as the working baseline until superseded by a later ADR.
-
----
-
-## Provisional decisions (summary)
-
-| ID | Summary | Blocks on |
-|---|---|---|
-| D-PROV-1 | Evolve X; do not replace with Wayland identity | A1, A3, H1–H3 |
-| D-PROV-2 | Dual engine: legacy X11 path + native X12 surfaces | B3, B4 |
-| D-PROV-3 | Hybrid namespaces + capabilities; default deny sensitive ops | C1–C4 |
-| D-PROV-4 | dmabuf + explicit sync + atomic KMS as native path | D1–D5 |
-| D-PROV-5 | Remoting is a designed transport profile, not raw ambient X | E1–E3 |
-| D-PROV-6 | Continue XCB-style protocol codegen | F1, F3 |
-| D-PROV-7 | Monolithic meson-friendly tree (X11R8 lineage) for embedded/minimal | A2, D12 |
-
----
-
-## Explicit non-decisions (open)
-
-| Topic | Why open |
+| ID | Summary |
 |---|---|
-| Wire major version number (stay 11+extensions vs new major 12) | Needs B3/B4 + ecosystem cost analysis |
-| Memory-safe language boundary | Needs F2 spike |
-| Built-in vs external compositor | Needs D2 + WM roadmap |
-| Mercurius-like remoting vs TLS-wrapped X | Needs E2 spike |
-| Relationship to XLibre code | Needs A3 (technical reuse vs independent) |
+| D-ACC-1 | Document all architecture choices as ADRs |
+| D-ACC-2 | Legacy X11R8 tests (meson / xauth / x11perf / xcmstest) are a merge gate |
+| D-ACC-3 | Product = protocol + server for modern Linux desktop; independent `dimmus/x12` |
+| D-ACC-4 | Speak X11 natively; evolve via extensions; rebuild OK for native libs |
+| D-ACC-5 | Hierarchical levels sandbox/user/full; default **full**; automation without global disable |
+| D-ACC-6 | Grant UX: CLI + polkit-like agent + auth tokens + compositor prompts |
+| D-ACC-7 | Multi-user/nested: in scope with most up-to-date seat/session design |
+| D-ACC-8 | API-agnostic dmabuf surfaces; mandatory built-in compositor; explicit sync |
+| D-ACC-9 | HDR/ICC in v2; fractional scale toolkit-opt-in; support proprietary NVIDIA paths |
+| D-ACC-10 | XML (XCB-style) IDL; hybrid memory-safe protocol front-end + C core |
+| D-ACC-11 | Client bindings priority: C/XCB |
+| D-ACC-12 | G1 = Xvfb + xterm + deny keylog + one Vulkan client |
+| D-ACC-13 | License MIT/X11-style; decision owner Dimmus |
+| D-ACC-14 | Non-goals: not Wayland compositor; no XWayland/XWin/XQuartz; not a DE; no obscure-extension guarantee |
+| D-ACC-15 | Remoting deferred (E skipped) |
+
+---
+
+## Open implementation spikes (not undecided product strategy)
+
+| Topic | Next artifact |
+|---|---|
+| Memory-safe front-end language (Rust vs Zig vs other) | Follow-up ADR when spike completes |
+| Exact hierarchical request matrix | Security extension protocol ADR |
+| X11R8 tree import/vendor strategy (submodule vs copy) | Implementation PR + short ADR if needed |
+| Remoting | Only if Dimmus reopens E* with a new ADR |
 
 ---
 
@@ -70,6 +62,5 @@ All designated legacy tests must pass. Removals need ADR + explicit approval. Po
 
 | Date | Source | Effect |
 |---|---|---|
-| 2026-07-25 | Initial request | Accepted ADR-0004 (legacy pass-through); commissioned strategy + questions |
-
-*(Append rows when QUESTIONS.md is answered.)*
+| 2026-07-25 | Initial request | ADR-0001, ADR-0004; strategy draft |
+| 2026-07-25 | Answers in `QUESTIONS.md` | Promoted ADR-0002/0003/0005; added ADR-0006/0007; locked D-ACC-3…15 |

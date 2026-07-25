@@ -1,38 +1,50 @@
-# ADR-0003: Capability / hierarchical security model
+# ADR-0003: Hierarchical security model
 
 ## Status
 
-Provisional — 2026-07-25 (awaiting QUESTIONS C1–C5)
+Accepted — 2026-07-25 (QUESTIONS C1–C5, G1)
 
 ## Context
 
-Classic X11 ambient trust enables keylogging, input injection, and screen theft by any client. Wayland’s default isolation broke legitimate global tooling. XLibre’s Xnamespace (via XACE) shows a practical isolation direction. Community X12 mail (Mar 2026) proposed sandbox / user / full levels.
+Classic X11 ambient trust enables keylogging, input injection, and screen theft. Wayland-style total isolation breaks trusted automation. Stakeholder chose hierarchical levels with a **full** default for ordinary local clients, while still requiring a milestone that demonstrates **capability deny keylog** for restricted clients.
 
-## Decision (provisional)
+## Decision
 
-1. **Default deny** for: global raw key/button grabs, foreign window content read, synthetic input injection, unrestricted selection sniffing, overlay redirect abuse.
-2. Use a **hybrid model**:
-   - **Namespaces** for coarse isolation (selections, client-to-client messaging).
-   - **Capabilities** for privileged operations (capture, inject, global-bind, accessibility).
-   - Optional **tiers** (sandbox / user / trusted) as convenience profiles over capability sets.
-3. Trusted automation and accessibility must remain possible via **explicit grant**, not by turning isolation off.
-4. Auth tokens (`.Xauthority` / successor) bind a connection to a namespace + capability set.
-5. Implement mediation on XACE-style hooks so legacy request paths are covered.
+1. Permission model is **hierarchical levels**: `sandbox` < `user` < `full` (C1).
+2. **Default** for newly connected local clients is **`full`** (C2) — preserves classic X tooling UX for trusted desktop sessions.
+3. Levels may be assigned/lowered/raised via **all** grant channels (C3):
+   - CLI / server flags
+   - polkit-like agent
+   - `.Xauthority` (or successor) tokens
+   - compositor prompts
+4. **Trusted automation** (macros, xdotool-class tools, accessibility) must work **without** globally disabling security (C4) — use `full` or explicit grants, not a master “turn off isolation” switch as the only path.
+5. Multi-user-on-one-seat and nested servers: **in scope**, using the **most up-to-date** seat/session design available (C5) — prefer modern seatd/logind-class integration over legacy multi-seat hacks.
+6. Milestone G1 requires a demo where a **non-full** (sandbox/user) client **cannot keylog** other clients — hierarchical enforcement is real, not documentary.
+
+### Level sketch (normative intent)
+
+| Level | Intent |
+|---|---|
+| `sandbox` | Own windows/resources only; no foreign input/content/selection sniff; no synthetic inject |
+| `user` | Normal app interactions in the user session; limited cross-client ops per policy |
+| `full` | Trusted session client / automation / WM-class tools; broad access within the seat |
+
+Exact request matrices will be specified in a later protocol extension ADR; this ADR locks the model shape.
 
 ## Consequences
 
-- Requires a grant agent / policy config story (UX TBD in QUESTIONS C3).
-- Legacy tools like naive `xinput` sniffers will fail until granted — intentional.
-- Security tests become part of CI alongside legacy functional tests.
+- Default-full means shipping desktops remain familiar; lockdown is opt-in per client/token.
+- Security tests must cover sandbox deny paths (keylog) and full-path automation success.
+- Grant UX surface is broad — need a small policy library shared by CLI, agent, auth, and compositor.
 
 ## Alternatives
 
-- Ambient trust forever — rejected.
-- Pure Wayland-style compositor-only policy with no global tools — rejected for this lineage’s tooling needs.
-- SELinux-only mediation — insufficient alone; keep as optional reinforcement.
+- Default sandbox (Wayland-like) — rejected (C2).
+- Fine-grained capabilities as the *only* primitive — rejected as primary model (C1 chose levels); fine-grained bits may still implement levels internally.
+- Namespace-only (XLibre-like) as sole primitive — not chosen as primary; may still inform isolation of selections between levels.
 
 ## References
 
-- XACE specification
-- XLibre `Xnamespace` documentation
-- xorg-devel “X12: A proposal for modernizing the X Window System” (2026-03)
+- `docs/QUESTIONS.md` Answers 2026-07-25
+- Community X12 hierarchical proposal (xorg-devel, 2026-03)
+- XACE / XLibre Xnamespace as implementation study material

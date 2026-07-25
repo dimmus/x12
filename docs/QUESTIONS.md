@@ -1,7 +1,7 @@
 # Strategy Clarifying Questions
 
-Please answer these so we can lock ADRs. Reply inline (Y/N, choice, or short prose).  
-Unanswered items stay **Provisional** in [DECISIONS.md](DECISIONS.md).
+**Status:** Answered 2026-07-25 — ADRs promoted in [`DECISIONS.md`](DECISIONS.md).  
+Original questions retained below for audit. Canonical answers are in the **Answers** section at the bottom.
 
 ---
 
@@ -128,16 +128,38 @@ Reply keep / drop / rewrite for each provisional non-goal:
 
 ---
 
-## How to answer
+## Answers (2026-07-25)
 
-Open an issue comment, PR review, or edit this file with a section:
+Stakeholder: **Dimmus** (decision owner, G3).
 
-```md
-## Answers (YYYY-MM-DD)
-
-A1: ...
-A2: ...
-...
-```
-
-Then we will promote Provisional ADRs to Accepted.
+| ID | Answer |
+|---|---|
+| **A1** | **(a)** Protocol + server successor that other WMs/toolkits adopt |
+| **A2** | **Modern Linux desktop** (primary target) |
+| **A3** | **Independent** `dimmus/x12` line only |
+| **B1** | **Yes** — all legacy tests must pass (XWayland/XWin/XQuartz remain out of scope) |
+| **B2** | **X11R8** meson test suite / xauth scripts / x11perf / xcmstest |
+| **B3** | **(a)** X12 server speaks X11 protocol natively; extensions evolve in place |
+| **B4** | **Rebuild** against new libs acceptable for X12 native clients |
+| **C1** | **Hierarchical levels** (sandbox / user / full) |
+| **C2** | Default local clients: **full** |
+| **C3** | Grant UX: **all of the above** (CLI flags, polkit-like agent, `.Xauthority` tokens, compositor prompt) |
+| **C4** | **Yes** — trusted automation must remain possible without disabling security globally |
+| **C5** | Use the **most up-to-date** multi-user / nested-server solution (in scope; prefer modern seat/session design) |
+| **D1** | **API-agnostic** dmabuf surfaces |
+| **D2** | **Built-in compositor** mandatory |
+| **D3** | HDR + ICC: **v2** |
+| **D4** | Fractional per-monitor scaling: **toolkits must opt in** (no server-side blur-scale of unaware clients as the primary policy) |
+| **D5** | **Support proprietary** NVIDIA paths (XLibre-class), not GBM-only |
+| **E1–E3** | **Skipped** — remoting deferred; no remoting ADR locked this round |
+| **F1** | **XML (XCB-style)** protocol IDL |
+| **F2** | **Hybrid** C core + memory-safe protocol front-end |
+| **F3** | Client bindings priority: **C/XCB** first |
+| **G1** | First public milestone: **Xvfb + xterm + capability deny keylog + one Vulkan client** |
+| **G2** | License: **MIT/X11-style**, same continuity as X.Org |
+| **G3** | Decision owner: **Dimmus** |
+| **H1** | True — not a Wayland compositor implementation |
+| **H2** | True — no XWayland |
+| **H3** | True — no XWin / XQuartz in v1 |
+| **H4** | True — not a full desktop environment |
+| **H5** | True — no guarantee of wire-compat with every obscure historical extension |

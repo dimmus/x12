@@ -1,30 +1,26 @@
 # Legacy test harness (contract)
 
-This directory is the **pass-through gate** described in [`docs/LEGACY_TESTS.md`](../../docs/LEGACY_TESTS.md).
+Pass-through gate for the **X11R8** corpus — see [`docs/LEGACY_TESTS.md`](../../docs/LEGACY_TESTS.md).
+
+## Locked corpus (B2)
+
+- X11R8 meson test suite
+- xauth scripts
+- x11perf
+- xcmstest
 
 ## Status
 
-Harness placeholder — server/protocol code not yet imported.  
-When the X12 / X11 compatibility server lands, this suite becomes a required CI target:
+Harness placeholder until the X11R8-derived server tree is imported.
 
 ```sh
 ./tests/legacy/run.sh
-# or
+# later:
 meson test -C build --suite legacy
 ```
 
-## Planned contents
-
-| Path | Purpose |
-|---|---|
-| `run.sh` | Entry point: start Xvfb, run corpus, collect junit/log |
-| `smoke/` | Minimal protocol bring-up (create/map window, events) |
-| `xauth/` | Imported/adapted from `dimmus/X11R8` xauth scripts |
-| `xcb/` | Imported/adapted from `dimmus/XCB` |
-| `apps/` | xterm/xclock/twm smoke under virtual framebuffer |
-
 ## Rules
 
-- Do not delete failing coverage to go green — fix or ADR.
+- Do not delete failing coverage to go green — fix or ADR + Dimmus ack.
 - New skips need an issue link in the skip reason.
-- Security/capability tests are separate (`tests/security/` later) and do not replace this suite.
+- G1 security demo (`tests/security/` later) complements this suite; it does not replace it.
