@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2026 Dimmus and contributors
+SPDX-License-Identifier: MIT
+
+X12-SCALE — toolkit-opt-in fractional / per-monitor scaling (ADR-0005 D4).
+Server never silently blur-scales unaware legacy clients.
+-->
+<xcb header="x12_scale" extension-xname="X12-SCALE" extension-name="X12Scale"
+  major-version="1" minor-version="0">
+  <import>xproto</import>
+
+  <enum name="Error">
+    <item name="BadMonitor"><value>0</value></item>
+  </enum>
+  <error name="Monitor" number="0" />
+
+  <request name="QueryVersion" opcode="0">
+    <field type="CARD32" name="major_version" />
+    <field type="CARD32" name="minor_version" />
+    <reply>
+      <pad bytes="1" />
+      <field type="CARD32" name="major_version" />
+      <field type="CARD32" name="minor_version" />
+    </reply>
+  </request>
+
+  <!--
+    scale_x / scale_y are in 16.16 fixed point (1.0 = 0x10000).
+    Toolkit must OptIn before the server applies non-1.0 scale to that client.
+  -->
+  <request name="GetScale" opcode="1">
+    <field type="WINDOW" name="window" />
+    <reply>
+      <pad bytes="1" />
+      <field type="CARD32" name="scale_x" />
+      <field type="CARD32" name="scale_y" />
+      <field type="CARD16" name="width_mm" />
+      <field type="CARD16" name="height_mm" />
+      <pad bytes="12" />
+    </reply>
+  </request>
+
+  <request name="OptIn" opcode="2">
+    <field type="WINDOW" name="window" />
+    <field type="BOOL" name="enable" />
+    <pad bytes="3" />
+  </request>
+</xcb>

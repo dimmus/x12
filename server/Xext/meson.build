@@ -41,7 +41,7 @@ endif
 
 x12_surface_incs = []
 if build_x12_surface
-    srcs_xext += 'x12surface.c'
+    srcs_xext += ['x12surface.c', 'x12scale.c']
     x12_surface_incs += include_directories('../../safe/x12-proto/include')
 endif
 

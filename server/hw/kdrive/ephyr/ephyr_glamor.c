@@ -39,6 +39,9 @@
 #include "ephyr.h"
 #include "ephyr_glamor.h"
 #include "os.h"
+#ifdef DRI3
+#include "dri3.h"
+#endif
 
 /* until we need geometry shaders GL3.1 should suffice. */
 /* Xephyr has its own copy of this for build reasons */
@@ -92,6 +95,20 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
     }
 }
 
+#ifdef DRI3
+/* Nested Xephyr: register glamor dmabuf import so X12-SURFACE can use
+ * pixmap_from_fds when the host EGL/GBM stack can import (not Xvfb mmap).
+ * Real KMS atomic scanout remains a DRM DDX concern (ADR-0018).
+ */
+static const dri3_screen_info_rec ephyr_dri3_info = {
+    .version = 2,
+    .pixmap_from_fds = glamor_pixmap_from_fds,
+    .pixmap_from_fd = glamor_pixmap_from_fd,
+    .fds_from_pixmap = glamor_egl_fds_from_pixmap,
+    .fd_from_pixmap = glamor_egl_fd_from_pixmap,
+};
+#endif
+
 void
 glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 {
@@ -101,6 +118,10 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     struct ephyr_glamor *ephyr_glamor = scrpriv->glamor;
 
     glamor_enable_dri3(screen);
+#ifdef DRI3
+    if (!dri3_screen_init(screen, &ephyr_dri3_info))
+        ErrorF("Xephyr: DRI3 screen init failed (X12-SURFACE stays mmap)\n");
+#endif
     glamor_ctx->display = ephyr_glamor->dpy;
     glamor_ctx->ctx = ephyr_glamor->ctx;
     glamor_ctx->surface = ephyr_glamor->egl_win;

@@ -5,12 +5,13 @@
  * Levels: sandbox (0) < user (1) < full (2)
  * Default: full (-client-level)
  *
- * Request matrix (post-G1):
- *  sandbox — no keyboard read/grab/write; no foreign receive; no foreign
- *            GetImage/drawable read; no foreign selection/property sniff;
- *            no XTEST/RECORD dispatch
+ * Request matrix (post-G1 / ADR-0018):
+ *  sandbox — no device read/grab/write (keyboard + pointer / XI2); no
+ *            foreign receive; no foreign GetImage; no foreign
+ *            selection/property sniff; no cursor image DixRead; no
+ *            XTEST/RECORD dispatch. Sandbox ≠ WM.
  *  user    — no foreign GetImage; no foreign selection sniff; no XTEST;
- *            keyboard QueryKeymap allowed
+ *            keyboard QueryKeymap allowed; pointer OK; no keyboard grab/inject
  *  full    — unrestricted (legacy ambient trust)
  */
 
@@ -179,10 +180,7 @@ X12LevelDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (level == X12_LEVEL_FULL)
         return;
 
-    if (!x12IsKeyboardDevice(rec->dev))
-        return;
-
-    /* sandbox: no read/grab/write (blocks QueryKeymap, GrabKey, XTest inject) */
+    /* sandbox: no device read/grab/write (keyboard + pointer / XI2 select) */
     if (level == X12_LEVEL_SANDBOX) {
         if (rec->access_mode &
             (DixReadAccess | DixGrabAccess | DixWriteAccess)) {
@@ -191,7 +189,9 @@ X12LevelDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
         return;
     }
 
-    /* user: allow QueryKeymap (read); still block grab + inject */
+    /* user: pointer OK; keyboard QueryKeymap OK; block grab + inject */
+    if (!x12IsKeyboardDevice(rec->dev))
+        return;
     if (rec->access_mode & (DixGrabAccess | DixWriteAccess))
         rec->status = BadAccess;
 }
@@ -231,6 +231,13 @@ X12LevelResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     level = X12LevelOfClient(rec->client);
     if (level == X12_LEVEL_FULL)
         return;
+
+    /* Cursor image sniff (XFixes GetCursorImage) — sandbox only. */
+    if (rec->rtype == X11_RESTYPE_CURSOR) {
+        if (level == X12_LEVEL_SANDBOX && (rec->access_mode & DixReadAccess))
+            rec->status = BadAccess;
+        return;
+    }
 
     /* Foreign drawable content reads (GetImage) — sandbox and user. */
     steal = DixReadAccess;

@@ -31,6 +31,18 @@ if ! "$ROOT/tests/surface/run_vk_present.sh"; then
   FAIL=1
 fi
 
+echo "x12: surface sync_present"
+if ! "$ROOT/tests/surface/run_sync_present.sh"; then
+  echo "x12: FAIL — surface sync_present" >&2
+  FAIL=1
+fi
+
+echo "x12: surface scale_stub"
+if ! "$ROOT/tests/surface/run_scale_stub.sh"; then
+  echo "x12: FAIL — surface scale_stub" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "x12: FAILED" >&2
   exit 1

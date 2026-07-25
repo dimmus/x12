@@ -8,6 +8,7 @@
 
 pub mod ffi;
 pub mod frame;
+pub mod generated_decode;
 pub mod generated_wire;
 pub mod level;
 pub mod x12_surface;

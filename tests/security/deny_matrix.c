@@ -8,6 +8,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
+#include <X11/extensions/Xfixes.h>
 #include <X11/keysym.h>
 #include <stdio.h>
 #include <string.h>
@@ -143,6 +144,25 @@ main(void)
         }
     }
     printf("deny_matrix: XTest inject denied OK\n");
+
+    /* Sandbox must not read cursor image (XFixes). */
+    {
+        int evb = 0, errb = 0;
+        XFixesCursorImage *ci;
+        if (!XFixesQueryExtension(full, &evb, &errb)) {
+            XSetErrorHandler(old_handler);
+            return fail("full missing XFixes");
+        }
+        g_xerrs = 0;
+        ci = XFixesGetCursorImage(sand);
+        XSync(sand, False);
+        if (ci) {
+            XFree(ci);
+            XSetErrorHandler(old_handler);
+            return fail("sandbox XFixesGetCursorImage succeeded");
+        }
+    }
+    printf("deny_matrix: cursor image denied OK\n");
 
     XSetErrorHandler(old_handler);
     XDestroyWindow(full, win);

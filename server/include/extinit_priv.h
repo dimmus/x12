@@ -44,6 +44,7 @@ void XCMiscExtensionInit(void);
 void SecurityExtensionInit(void);
 void X12LevelExtensionInit(void);
 void X12SurfaceExtensionInit(void);
+void X12ScaleExtensionInit(void);
 void XFree86BigfontExtensionInit(void);
 void BigReqExtensionInit(void);
 void XFixesExtensionInit(void);

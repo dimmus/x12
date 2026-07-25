@@ -188,10 +188,10 @@ THE SOFTWARE.
   </request>
 
   <!--
-    Present an attached surface. When Capability.Syncobj is absent (G1 Xvfb),
-    acquire/release syncobj and timeline points must be None/0. Pads and
-    MSC fields are reserved for a future compositor clock; they are not a
-    PresentPixmap alias.
+    Present an attached surface. Capability.Syncobj enables acquire/release
+    timeline points (software timeline on Xvfb; DRM syncobj when DDX provides
+    it). target_msc / divisor / remainder drive the compositor clock (fake MSC
+    on Xvfb). Not a PresentPixmap alias.
   -->
   <request name="Present" opcode="9">
     <required_start_align align="8" />

@@ -123,6 +123,7 @@ static const ExtensionModule staticExtensions[] = {
 #endif
 #ifdef X12SURFACE
     {X12SurfaceExtensionInit, "X12-SURFACE", NULL},
+    {X12ScaleExtensionInit, "X12-SCALE", NULL},
 #endif
 #ifdef XINERAMA
     {PanoramiXExtensionInit, "XINERAMA", &noPanoramiXExtension},
