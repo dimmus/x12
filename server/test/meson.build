@@ -216,12 +216,21 @@ else
     message('ld -wrap required for xi1 & xi2 unit tests, skipping')
 endif
 
+unit_deps = [libx11, libxcvt, dep_pixman, xproto]
+unit_link_depends = []
+# x12surface.c in libxserver_xext needs the Rust front-end at final link.
+if build_x12_surface
+    unit_deps += dep_x12_proto
+    unit_link_depends += x12_proto_a
+endif
+
 unit = executable('tests',
         unit_sources,
         c_args: unit_c_args,
-        dependencies: [libx11, libxcvt, dep_pixman, xproto],
+        dependencies: unit_deps,
         include_directories: unit_includes,
         link_args: ldwraps,
+        link_depends: unit_link_depends,
         link_with: xorg_link,
 )
 
