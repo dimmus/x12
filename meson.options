@@ -10,6 +10,7 @@ option('build-xproto-legacy',   type: 'boolean', value: false)
 option('build-demo',            type: 'boolean', value: true ) # x12: x11perf / xcmstest legacy corpus
 option('build-app',             type: 'boolean', value: true )
 option('build-test',            type: 'boolean', value: true ) # x12: server/lib meson tests + legacy gate
+option('build-safe-proto',      type: 'boolean', value: true ) # x12: Rust protocol front-end cargo test
 option('build-doc',             type: 'boolean', value: false)
 
 ## SETUP

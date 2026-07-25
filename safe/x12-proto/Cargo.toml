@@ -1,0 +1,15 @@
+[package]
+name = "x12-proto"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Memory-safe X12 protocol front-end (decode/validate spike)"
+publish = false
+
+[lib]
+name = "x12_proto"
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[profile.release]
+lto = true
+panic = "abort"

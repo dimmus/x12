@@ -44,3 +44,14 @@ jobs:
 
       - name: Legacy suite (includes deny_keylog)
         run: ./tests/legacy/run.sh
+
+  safe-proto:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Safe protocol front-end tests
+        run: ./tests/safe_proto/run.sh
