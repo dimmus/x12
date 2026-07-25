@@ -103,7 +103,8 @@ jobs:
             lib/src/xau/libXau.so.6.0.0 \
             lib/src/xdmcp/libXdmcp.so.6.0.0 \
             lib/ext/xext/libXext.so.6.4.0 \
-            safe/libx12_proto.a
+            safe/libx12_proto.a \
+            app/xwm/xwm
       - name: X12 smokes under ASAN
         env:
           X12_BUILD_DIR: ${{ github.workspace }}/build-asan
