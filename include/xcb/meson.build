@@ -25,6 +25,7 @@ install_headers(
     'dpms.h',
     'dri2.h',
     'dri3.h',
+    'x12_surface.h',
     'present.h',
     'glx.h',
     'randr.h',

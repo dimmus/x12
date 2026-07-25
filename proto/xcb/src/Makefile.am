@@ -11,6 +11,7 @@ xcbinclude_HEADERS = \
 	ge.xml \
 	glx.xml \
 	present.xml \
+	x12_surface.xml \
 	randr.xml \
 	record.xml \
 	render.xml \

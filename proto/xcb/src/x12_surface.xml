@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2026 Dimmus and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<!--
+  X12-SURFACE — API-agnostic dmabuf surfaces + explicit sync (ADR-0005).
+
+  Native presentation path for X12 clients (Vulkan, EGL/GL, or other producers).
+  The wire deals in dmabuf FDs, DRM fourcc formats, modifiers, and timeline
+  syncobjs — not a single GPU API. Built-in compositor consumes PresentSurface
+  (server implementation lands with ROADMAP step 7).
+
+  Modeled on DRI3 (buffers/modifiers/syncobj) and Present (feedback/events)
+  without requiring DRI3/GLX for new clients.
+-->
+
+<xcb header="x12_surface" extension-xname="X12-SURFACE" extension-name="X12Surface"
+  major-version="1" minor-version="0">
+  <import>xproto</import>
+
+  <!-- Types -->
+
+  <xidtype name="SURFACE" />
+  <xidtype name="SYNCOBJ" />
+  <xidtype name="EVENT" />
+
+  <enum name="Capability">
+    <item name="None"><value>0</value></item>
+    <!-- Timeline syncobj acquire/release on PresentSurface -->
+    <item name="Syncobj"><bit>0</bit></item>
+    <!-- Multi-plane dmabuf (up to 4 planes) -->
+    <item name="Multiplane"><bit>1</bit></item>
+    <!-- Modifier negotiation via QueryModifiers -->
+    <item name="Modifiers"><bit>2</bit></item>
+  </enum>
+
+  <enum name="PresentOption">
+    <item name="None"><value>0</value></item>
+    <item name="Async"><bit>0</bit></item>
+    <item name="Copy"><bit>1</bit></item>
+    <item name="TearFree"><bit>2</bit></item>
+  </enum>
+
+  <enum name="CompleteMode">
+    <item name="Copy"><value>0</value></item>
+    <item name="Flip"><value>1</value></item>
+    <item name="Skip"><value>2</value></item>
+  </enum>
+
+  <enum name="Event">
+    <item name="ConfigureNotify"><value>0</value></item>
+    <item name="CompleteNotify"><value>1</value></item>
+    <item name="IdleNotify"><value>2</value></item>
+  </enum>
+
+  <enum name="EventMask">
+    <item name="NoEvent"><value>0</value></item>
+    <item name="ConfigureNotify"><bit>0</bit></item>
+    <item name="CompleteNotify"><bit>1</bit></item>
+    <item name="IdleNotify"><bit>2</bit></item>
+  </enum>
+
+  <enum name="Error">
+    <item name="BadSurface"><value>0</value></item>
+    <item name="BadSyncobj"><value>1</value></item>
+  </enum>
+
+  <error name="Surface" number="0" />
+  <error name="Syncobj" number="1" />
+
+  <!-- Requests -->
+
+  <request name="QueryVersion" opcode="0">
+    <field type="CARD32" name="major_version" />
+    <field type="CARD32" name="minor_version" />
+    <reply>
+      <pad bytes="1" />
+      <field type="CARD32" name="major_version" />
+      <field type="CARD32" name="minor_version" />
+    </reply>
+  </request>
+
+  <request name="QueryCapabilities" opcode="1">
+    <field type="DRAWABLE" name="drawable" />
+    <reply>
+      <pad bytes="1" />
+      <field type="CARD32" name="capabilities" mask="Capability" />
+    </reply>
+  </request>
+
+  <!--
+    DRM fourcc format + modifier lists for a drawable context.
+    Window modifiers are preferred for presentation; screen modifiers are
+    a fallback set for allocation.
+  -->
+  <request name="QueryModifiers" opcode="2">
+    <field type="DRAWABLE" name="drawable" />
+    <field type="CARD32" name="format" />
+    <reply>
+      <required_start_align align="8" />
+      <pad bytes="1" />
+      <field type="CARD32" name="num_window_modifiers" />
+      <field type="CARD32" name="num_screen_modifiers" />
+      <pad bytes="16" />
+      <list type="CARD64" name="window_modifiers">
+        <fieldref>num_window_modifiers</fieldref>
+      </list>
+      <list type="CARD64" name="screen_modifiers">
+        <fieldref>num_screen_modifiers</fieldref>
+      </list>
+    </reply>
+  </request>
+
+  <!--
+    Create a SURFACE from client-owned dmabuf plane FDs.
+    format is a DRM fourcc; depth/bpp aid X visual matching when needed.
+    num_buffers is 1..4; unused stride/offset fields must be zero.
+  -->
+  <request name="CreateSurface" opcode="3">
+    <required_start_align align="8" />
+    <field type="SURFACE" name="surface" />
+    <field type="DRAWABLE" name="drawable" />
+    <field type="CARD8" name="num_buffers" />
+    <pad bytes="3" />
+    <field type="CARD16" name="width" />
+    <field type="CARD16" name="height" />
+    <field type="CARD32" name="stride0" />
+    <field type="CARD32" name="offset0" />
+    <field type="CARD32" name="stride1" />
+    <field type="CARD32" name="offset1" />
+    <field type="CARD32" name="stride2" />
+    <field type="CARD32" name="offset2" />
+    <field type="CARD32" name="stride3" />
+    <field type="CARD32" name="offset3" />
+    <field type="CARD8" name="depth" />
+    <field type="CARD8" name="bpp" />
+    <pad bytes="2" />
+    <field type="CARD64" name="modifier" />
+    <!-- DRM fourcc; placed after modifier to keep CARD64 at DRI3-compatible offset -->
+    <field type="CARD32" name="format" />
+    <pad bytes="4" />
+    <list type="fd" name="buffers">
+      <fieldref>num_buffers</fieldref>
+    </list>
+  </request>
+
+  <request name="DestroySurface" opcode="4">
+    <field type="SURFACE" name="surface" />
+  </request>
+
+  <request name="ImportSyncobj" opcode="5">
+    <field type="SYNCOBJ" name="syncobj" />
+    <field type="DRAWABLE" name="drawable" />
+    <fd name="syncobj_fd" />
+  </request>
+
+  <request name="FreeSyncobj" opcode="6">
+    <field type="SYNCOBJ" name="syncobj" />
+  </request>
+
+  <!-- Associate a surface with a window for built-in compositor scanout. -->
+  <request name="Attach" opcode="7">
+    <field type="WINDOW" name="window" />
+    <field type="SURFACE" name="surface" />
+  </request>
+
+  <request name="Detach" opcode="8">
+    <field type="WINDOW" name="window" />
+  </request>
+
+  <!--
+    Present an attached (or explicitly named) surface to a window with
+    timeline sync points. acquire_syncobj/release_syncobj may be None (0)
+    when Capability.Syncobj is unused; then implicit sync may apply.
+  -->
+  <!--
+    Layout mirrors PresentPixmapSynced field sizes so CARD64 sync/MSC
+    offsets stay xcbgen-legal (reserved pads stand in for REGION/CRTC).
+  -->
+  <request name="Present" opcode="9">
+    <required_start_align align="8" />
+    <field type="WINDOW" name="window" />
+    <field type="SURFACE" name="surface" />
+    <field type="CARD32" name="serial" />
+    <pad bytes="8" />
+    <field type="INT16" name="x_off" />
+    <field type="INT16" name="y_off" />
+    <pad bytes="4" />
+    <field type="SYNCOBJ" name="acquire_syncobj" />
+    <field type="SYNCOBJ" name="release_syncobj" />
+    <field type="CARD64" name="acquire_point" />
+    <field type="CARD64" name="release_point" />
+    <field type="CARD32" name="options" mask="PresentOption" />
+    <pad bytes="4" />
+    <field type="CARD64" name="target_msc" />
+    <field type="CARD64" name="divisor" />
+    <field type="CARD64" name="remainder" />
+  </request>
+
+  <request name="SelectInput" opcode="10">
+    <field type="EVENT" name="eid" />
+    <field type="WINDOW" name="window" />
+    <field type="CARD32" name="event_mask" mask="EventMask" />
+  </request>
+
+  <!-- Events (XGE) -->
+
+  <event name="ConfigureNotify" number="0" xge="true">
+    <pad bytes="2" />
+    <field type="EVENT" name="event" />
+    <field type="WINDOW" name="window" />
+    <field type="CARD16" name="width" />
+    <field type="CARD16" name="height" />
+    <pad bytes="16" />
+  </event>
+
+  <event name="CompleteNotify" number="1" xge="true">
+    <required_start_align align="8" />
+    <field type="CARD8" name="mode" enum="CompleteMode" />
+    <pad bytes="1" />
+    <field type="EVENT" name="event" />
+    <field type="WINDOW" name="window" />
+    <field type="CARD32" name="serial" />
+    <field type="CARD64" name="ust" />
+    <field type="CARD64" name="msc" />
+    <field type="SURFACE" name="surface" />
+    <pad bytes="4" />
+  </event>
+
+  <event name="IdleNotify" number="2" xge="true">
+    <pad bytes="2" />
+    <field type="EVENT" name="event" />
+    <field type="WINDOW" name="window" />
+    <field type="SURFACE" name="surface" />
+    <field type="CARD32" name="serial" />
+    <pad bytes="4" />
+  </event>
+
+</xcb>

@@ -14,6 +14,7 @@ src_proto += files(
     'dri2.c',
     'dri3.c',
     'present.c',
+    'x12_surface.c',
     'glx.c',
     'randr.c',
     'record.c',
