@@ -67,7 +67,6 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 |---|---|
 | Exact hierarchical request matrix | Security extension protocol ADR |
 | KMS/GBM dmabuf import (non-Xvfb) | ROADMAP after-G1 item A |
-| G1 public tag | Done — `g1` / ADR-0015 |
 | XML→Rust codec codegen | Follow-up when hand validators grow costly |
 | Remoting | Only if Dimmus reopens E* with a new ADR |
 
