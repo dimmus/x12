@@ -20,7 +20,9 @@ meson compile -C build
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Step 1 (this tree): X11R8 baseline imports, builds, and the legacy corpus gate is green.
+Progress: baseline builds + legacy gate + **X12-LEVEL** hierarchical security (deny-keylog test green). Remaining: dmabuf/Vulkan client path.
+
+Build uses **`meson.options`** (Meson ≥ 1.1).
 
 ## Locked strategy
 
