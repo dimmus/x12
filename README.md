@@ -20,7 +20,7 @@ meson compile -C build
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Progress: G1 path complete except final tag — Xvfb compositor + lavapipe Vulkan Present demo green with legacy suite.
+Progress: G1 path complete except final tag — Xvfb compositor + lavapipe Present demo green. Defaults trimmed to Xvfb + B2 corpus (ADR-0014).
 
 Build uses **`meson.options`** (Meson ≥ 1.1).
 

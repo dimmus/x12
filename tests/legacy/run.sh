@@ -137,24 +137,10 @@ if command -v timeout >/dev/null; then
   fi
 fi
 
-# --- G1 security: sandbox deny keylog ---
-echo "legacy: security deny_keylog"
-if ! "$ROOT/tests/security/run_deny_keylog.sh"; then
-  echo "legacy: FAIL — deny_keylog" >&2
-  FAIL=1
-fi
-
-# --- X12-SURFACE stub: QueryVersion via safe decode path ---
-echo "legacy: surface QueryVersion"
-if ! "$ROOT/tests/surface/run_query_version.sh"; then
-  echo "legacy: FAIL — surface QueryVersion" >&2
-  FAIL=1
-fi
-
-# --- G1: Vulkan → X12-SURFACE Present (lavapipe / memfd) ---
-echo "legacy: surface vk_present"
-if ! "$ROOT/tests/surface/run_vk_present.sh"; then
-  echo "legacy: FAIL — surface vk_present" >&2
+# --- X12-native G1 smokes (separate from locked B2 corpus) ---
+echo "legacy: invoking X12 smokes"
+if ! "$ROOT/tests/x12/run.sh"; then
+  echo "legacy: FAIL — X12 smokes" >&2
   FAIL=1
 fi
 
@@ -162,5 +148,5 @@ if [[ "$FAIL" -ne 0 ]]; then
   echo "legacy: FAILED" >&2
   exit 1
 fi
-echo "legacy: PASSED"
+echo "legacy: PASSED (B2 corpus + X12 smokes)"
 exit 0

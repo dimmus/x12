@@ -2,7 +2,8 @@
 
 **Status:** Accepted  
 **Related ADR:** [adr/0004-legacy-test-gate.md](adr/0004-legacy-test-gate.md)  
-**Corpus locked by:** QUESTIONS B1, B2 (2026-07-25)
+**Corpus locked by:** QUESTIONS B1, B2 (2026-07-25)  
+**Trim note:** [adr/0014-g1-trim-legacy-surface.md](adr/0014-g1-trim-legacy-surface.md)
 
 ## Rule
 
@@ -16,18 +17,16 @@
 3. Removals or skips require an explicit ADR + Dimmus acknowledgment in [DECISIONS.md](DECISIONS.md).
 4. New X12 features must not break X11-compatible behavior covered by the corpus.
 
-## In-scope corpus (locked)
+## In-scope corpus (locked B2)
 
-From `dimmus/X11R8` only:
+From the imported X11R8 tree:
 
-| Component | Examples |
+| Component | How it runs |
 |---|---|
-| Meson test suite | Targets defined by X11R8 `meson.build` / test harness |
-| xauth scripts | `app/xauth/tests/*` |
-| x11perf | `demo/x11perf` harness / do_tests |
-| xcmstest | `demo/xcmstest` |
-
-Import plan: vendor or submodule X11R8 pieces under `tests/legacy/` (or run against an X11R8 checkout) and wrap with `./tests/legacy/run.sh`.
+| Meson unit tests | Selected non-piglit targets in `./tests/legacy/run.sh` |
+| xauth scripts | `app/xauth/tests` via `XAUTH_BIN` |
+| x11perf | `demo/x11perf` under Xvfb |
+| xcmstest | `demo/xcmstest` under Xvfb |
 
 ## Out of scope (unless a future ADR adds them)
 
@@ -36,22 +35,28 @@ Import plan: vendor or submodule X11R8 pieces under `tests/legacy/` (or run agai
 - XWayland, XWin, XQuartz
 - Distro packaging tests
 - Obscure historical extension conformance beyond what X11R8 already runs (H5)
+- Toy demos (ico/maze/puzzle/…) — default-off (ADR-0014); not B2
+
+## X12-native smokes (not B2)
+
+`./tests/x12/run.sh` — deny_keylog, surface QueryVersion, vk_present. Invoked
+after the corpus by `./tests/legacy/run.sh` so one CI job covers G1.
 
 ## CI expectations
 
 ```text
-meson test -C build --suite legacy
-# or
-./tests/legacy/run.sh
+./tests/legacy/run.sh   # B2 corpus + X12 smokes
 ```
 
+There is no Meson `suite: 'legacy'` yet; the shell harness is the gate.
+
 - Prefer Xvfb for headless CI (aligns with G1).
-- ASAN/UBSAN advisory until a green baseline exists, then gate.
 - Silent skips forbidden; quarantines need an issue link.
 
-## Local developer workflow (target)
+## Local developer workflow
 
 ```sh
-./tests/legacy/run.sh
-meson test -C build --suite legacy
+./tests/legacy/run.sh     # full gate
+./tests/x12/run.sh        # X12-only smokes
+./tests/safe_proto/run.sh # Rust decode + IDL drift
 ```

@@ -31,7 +31,11 @@ docs = files(
     'renderproto.txt',
     'resproto.txt',
     'xv-protocol-v2.txt',
-    'xwaylandproto.txt'
 )
+
+# XWayland DDX is an X12 non-goal (H2); keep the text behind the legacy proto flag.
+if get_option('build-xproto-legacy')
+    docs += files('xwaylandproto.txt')
+endif
 
 install_data(docs, install_dir: dir_data / 'doc' / 'xproto')

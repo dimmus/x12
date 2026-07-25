@@ -49,5 +49,5 @@ jobs:
       - name: Safe protocol front-end + drift gate
         run: ./tests/safe_proto/run.sh
 
-      - name: Legacy suite (deny_keylog + surface QueryVersion)
+      - name: Legacy B2 corpus + X12 smokes
         run: ./tests/legacy/run.sh

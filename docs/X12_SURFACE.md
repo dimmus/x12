@@ -36,9 +36,9 @@ QueryVersion → QueryCapabilities → QueryModifiers(format)
 
 | Concern | DRI3 + Present | X12-SURFACE |
 |---|---|---|
-| Buffer object | `PIXMAP` from dmabuf | `SURFACE` (no pixmap required) |
-| Sync | Fence / syncobj via DRI3 | Syncobj in this extension |
-| Present | `PresentPixmap` / `PixmapSynced` | `Present` on `SURFACE` |
+| Buffer object | `PIXMAP` from dmabuf | `SURFACE` (Xvfb uses an internal fb pixmap for CopyArea only) |
+| Sync | Fence / syncobj via DRI3 | Syncobj optional; off on G1 Xvfb |
+| Present | `PresentPixmap` / `PixmapSynced` | `Present` on `SURFACE` (native; not a PresentPixmap alias) |
 | New Vulkan client | May use DRI3 | Preferred native path |
 
 ## Implementation status

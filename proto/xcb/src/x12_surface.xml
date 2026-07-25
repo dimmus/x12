@@ -188,13 +188,10 @@ THE SOFTWARE.
   </request>
 
   <!--
-    Present an attached (or explicitly named) surface to a window with
-    timeline sync points. acquire_syncobj/release_syncobj may be None (0)
-    when Capability.Syncobj is unused; then implicit sync may apply.
-  -->
-  <!--
-    Layout mirrors PresentPixmapSynced field sizes so CARD64 sync/MSC
-    offsets stay xcbgen-legal (reserved pads stand in for REGION/CRTC).
+    Present an attached surface. When Capability.Syncobj is absent (G1 Xvfb),
+    acquire/release syncobj and timeline points must be None/0. Pads and
+    MSC fields are reserved for a future compositor clock; they are not a
+    PresentPixmap alias.
   -->
   <request name="Present" opcode="9">
     <required_start_align align="8" />

@@ -1,7 +1,7 @@
 # Memory-safe protocol front-end
 
 **Crate:** [`safe/x12-proto`](../safe/x12-proto/)  
-**ADRs:** [ADR-0011](adr/0011-rust-protocol-frontend.md), [ADR-0012](adr/0012-surface-stub-and-safe-link.md)  
+**ADRs:** [ADR-0011](adr/0011-rust-protocol-frontend.md), [ADR-0012](adr/0012-surface-stub-and-safe-link.md), [ADR-0013](adr/0013-xvfb-compositor-vulkan.md)  
 **IDL source of truth:** [`proto/xcb/src/x12_surface.xml`](../proto/xcb/src/x12_surface.xml)
 
 ## Role
@@ -17,8 +17,8 @@ client bytes (+ SCM_RIGHTS FDs)
               │ x12_proto_surface_decoded_t (C ABI)
               ▼
  ┌──────────────────────────┐
- │  C dix X12-SURFACE stub  │  QueryVersion live; other ops → BadImplementation
- │  (step 7: compositor)    │
+ │  C dix X12-SURFACE       │  Query* / Create / Attach / Present (Xvfb)
+ │  (ADR-0013 compositor)   │  Syncobj ops → BadImplementation
  └──────────────────────────┘
 ```
 
@@ -37,13 +37,13 @@ client bytes (+ SCM_RIGHTS FDs)
 | Level | X12-SURFACE |
 |---|---|
 | sandbox | `QueryVersion`, `QueryCapabilities`, `QueryModifiers` only |
-| user / full | all opcodes (unimplemented → `BadImplementation` after decode) |
+| user / full | all opcodes (Syncobj still `BadImplementation` after decode) |
 
 ## Test
 
 ```bash
 ./tests/safe_proto/run.sh          # cargo test + sizeof drift gate
-./tests/surface/run_query_version.sh
+./tests/x12/run.sh                 # live Xvfb smokes
 # meson: meson test -C build --suite safe
 ```
 

@@ -32,16 +32,20 @@ Important defaults for uninstalled/CI runs:
 | `xkb_bin_dir` | `$builddir/app/xkbcomp` (avoids system xkbcomp + in-tree libX11 mismatch) |
 | `xkb_output_dir` | `/tmp/x12-xkb` |
 | `build-debug` | `false` (verbose DEBUG/XNL_DEBUG breaks Xt clients) |
-| `build-test` / `build-demo` / `demo-xcmstest` | `true` (legacy corpus) |
+| `build-test` / `build-demo` / `demo-x11perf` / `demo-xcmstest` | `true` (B2 corpus) |
+| `xvfb` | `true` (G1 server); `xnest` / `xephyr` default **off** |
+| toy demos / `build-font-server` / `build-video-intel` | default **off** (ADR-0014) |
+| `xprint` / `xevie` / `build-xproto-legacy` | default **off** |
 | `build-safe-proto` | `true` (registers `meson test safe-proto` when `cargo` exists) |
 
-## Legacy gate
+## Legacy gate + X12 smokes
 
 ```sh
-./tests/legacy/run.sh
+./tests/legacy/run.sh   # B2 corpus, then tests/x12/run.sh
+./tests/x12/run.sh      # deny_keylog + surface QueryVersion + vk_present
 ```
 
-Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`. Also runs `tests/security/run_deny_keylog.sh`.
+Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.
 
 ## Safe protocol front-end / X12-SURFACE
 
