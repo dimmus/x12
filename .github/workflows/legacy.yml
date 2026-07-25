@@ -24,7 +24,8 @@ jobs:
             mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
             libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
             libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
-            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
+            mesa-vulkan-drivers libvulkan-dev
           if ! pkg-config --exists bzip2; then
             sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
           prefix=/usr

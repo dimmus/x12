@@ -151,6 +151,13 @@ if ! "$ROOT/tests/surface/run_query_version.sh"; then
   FAIL=1
 fi
 
+# --- G1: Vulkan → X12-SURFACE Present (lavapipe / memfd) ---
+echo "legacy: surface vk_present"
+if ! "$ROOT/tests/surface/run_vk_present.sh"; then
+  echo "legacy: FAIL — surface vk_present" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "legacy: FAILED" >&2
   exit 1
