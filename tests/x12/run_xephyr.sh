@@ -27,6 +27,7 @@ XEPHYR_PID=""
 
 "$XVFB" ":$PARENT" -ac -screen 0 1024x768x24 \
   -extension XFree86-Bigfont \
+  -fp /usr/share/fonts/X11/misc \
   >/tmp/x12-xephyr-parent.log 2>&1 &
 PARENT_PID=$!
 
@@ -36,29 +37,40 @@ cleanup() {
 }
 trap cleanup EXIT
 
-for _ in $(seq 1 40); do
+for _ in $(seq 1 50); do
   [[ -S "/tmp/.X11-unix/X${PARENT}" ]] && break
   sleep 0.1
 done
 [[ -S "/tmp/.X11-unix/X${PARENT}" ]] || {
-  cat /tmp/x12-xephyr-parent.log >&2
+  echo "parent Xvfb failed" >&2
+  cat /tmp/x12-xephyr-parent.log >&2 || true
   exit 1
 }
 
 export DISPLAY=":$PARENT"
 unset XAUTHORITY
-"$XEPHYR" ":$NESTED" -ac -screen 800x600 \
+# Prefer software path; glamor can fail headless without a usable EGL config.
+"$XEPHYR" ":$NESTED" -ac -screen 800x600x24 -sw-cursor \
   -extension XFree86-Bigfont \
   >/tmp/x12-xephyr-nested.log 2>&1 &
 XEPHYR_PID=$!
 
-for _ in $(seq 1 50); do
-  [[ -S "/tmp/.X11-unix/X${NESTED}" ]] && break
+for _ in $(seq 1 80); do
+  if [[ -S "/tmp/.X11-unix/X${NESTED}" ]]; then
+    break
+  fi
+  if ! kill -0 "$XEPHYR_PID" 2>/dev/null; then
+    echo "Xephyr exited early" >&2
+    cat /tmp/x12-xephyr-nested.log >&2 || true
+    cat /tmp/x12-xephyr-parent.log >&2 || true
+    exit 1
+  fi
   sleep 0.1
 done
 [[ -S "/tmp/.X11-unix/X${NESTED}" ]] || {
-  echo "Xephyr failed" >&2
-  cat /tmp/x12-xephyr-nested.log >&2
+  echo "Xephyr failed to create socket" >&2
+  cat /tmp/x12-xephyr-nested.log >&2 || true
+  cat /tmp/x12-xephyr-parent.log >&2 || true
   exit 1
 }
 
