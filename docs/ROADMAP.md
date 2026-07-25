@@ -3,7 +3,7 @@
 **Owner:** Dimmus  
 **Milestone G1:** Xvfb + xterm + capability deny keylog + one Vulkan client — **tagged `g1`**  
 **Evidence:** [G1.md](G1.md) · [ADR-0015](adr/0015-g1-milestone-tag.md)  
-**Gate:** X11R8 legacy corpus green ([LEGACY_TESTS.md](LEGACY_TESTS.md))
+**App/compat gate:** X11R8 corpus green ([LEGACY_TESTS.md](LEGACY_TESTS.md)) — X11 is test/compat only (ADR-0017)
 
 ## Sequence
 
@@ -37,10 +37,11 @@
 A. [PARTIAL] DRI3 pixmap_from_fds CreateSurface + Damage Present (ADR-0016); Syncobj/MSC still open
 B. Toolkit-opt-in fractional / per-monitor scaling
 C. [DONE] Request matrix docs + XACE enforcement (docs/X12_LEVEL_MATRIX.md)
-D. [PARTIAL] Xephyr nested smoke (tests/x12/run_xephyr.sh); real KMS still open
+D. [PARTIAL] Xephyr nested smoke; real KMS still open — X11 DDX not a product goal (ADR-0017)
 E. HDR/ICC (v2)
 F. Remoting — only if a new ADR reopens E*
-G. [DONE] XML wire codegen + fuzz harness + ASAN CI job (ADR-0016)
+G. [DONE] XML wire codegen + fuzz harness + ASAN on X12 smokes (system xkbcomp; ADR-0016/0017)
+H. [DONE] Policy: X11 = compat/test only; invest in native X12 path (ADR-0017)
 ```
 
 ## Explicitly after G1 (detail)

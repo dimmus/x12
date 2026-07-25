@@ -3,7 +3,8 @@
 **Status:** Accepted  
 **Related ADR:** [adr/0004-legacy-test-gate.md](adr/0004-legacy-test-gate.md)  
 **Corpus locked by:** QUESTIONS B1, B2 (2026-07-25)  
-**Trim note:** [adr/0014-g1-trim-legacy-surface.md](adr/0014-g1-trim-legacy-surface.md)
+**Trim note:** [adr/0014-g1-trim-legacy-surface.md](adr/0014-g1-trim-legacy-surface.md)  
+**Scope:** X11 corpus is an **app/compat regression net**, not the product identity ([ADR-0017](adr/0017-x11-compat-test-only.md)).
 
 ## Rule
 

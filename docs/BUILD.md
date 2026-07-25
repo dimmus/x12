@@ -47,7 +47,8 @@ Important defaults for uninstalled/CI runs:
 ```
 
 Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.  
-Milestone evidence: [`docs/G1.md`](G1.md) (tag `g1`). Post-G1: [ADR-0016](adr/0016-best-of-best-post-g1.md).
+Milestone evidence: [`docs/G1.md`](G1.md) (tag `g1`). Post-G1: [ADR-0016](adr/0016-best-of-best-post-g1.md).  
+X11 is compat/test-only ([ADR-0017](adr/0017-x11-compat-test-only.md)); ASan CI uses `-Dxkb_bin_dir=/usr/bin`.
 
 ### Xephyr (non-Xvfb) smoke
 
