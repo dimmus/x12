@@ -1,6 +1,7 @@
 /*
- * X12-SURFACE: dmabuf surfaces + Xvfb compositor path (ADR-0013).
- * Decode/validate via Rust safe/x12-proto; Present CopyArea into attached window.
+ * X12-SURFACE: dmabuf surfaces + compositor path (ADR-0013 / ADR-0016).
+ * Decode via Rust; Present prefers DRI3 pixmap_from_fds when available,
+ * else Xvfb mmap+CopyArea. Damage notified after compose.
  */
 #include <dix-config.h>
 
@@ -15,6 +16,7 @@
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "protocol-versions.h"
+#include "regionstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 
@@ -25,6 +27,12 @@
 #include "x12_proto.h"
 #ifdef XACE
 #include "x12level.h"
+#endif
+#ifdef DRI3
+#include "../dri3/dri3_priv.h"
+#endif
+#ifdef DAMAGE
+#include "damage.h"
 #endif
 
 /* DRM fourcc / modifier without requiring libdrm for the extension unit. */
@@ -45,6 +53,7 @@ typedef struct _X12Surface
     PixmapPtr pixmap;
     void *map;
     size_t map_size;
+    Bool dri3_backed; /* pixmap owns storage; do not munmap */
     uint16_t width;
     uint16_t height;
     uint8_t depth;
@@ -86,7 +95,7 @@ X12SurfaceFreeSurface(void *data, XID id)
     }
     if (s->pixmap)
         (*s->pixmap->drawable.pScreen->DestroyPixmap)(s->pixmap);
-    if (s->map && s->map != MAP_FAILED)
+    if (!s->dri3_backed && s->map && s->map != MAP_FAILED)
         munmap(s->map, s->map_size);
     free(s);
     return Success;
@@ -292,8 +301,11 @@ ProcX12SurfaceQueryCapabilities(ClientPtr client,
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-        /* G1 Xvfb path: LINEAR single-plane mmap. Syncobj/Multiplane deferred. */
-        .capabilities = X12SurfaceCapabilityModifiers,
+        .capabilities = X12SurfaceCapabilityModifiers
+#ifdef DRI3
+                        | X12SurfaceCapabilityMultiplane
+#endif
+        ,
     };
 
     (void)decoded;
@@ -352,14 +364,14 @@ ProcX12SurfaceCreateSurface(ClientPtr client,
     X12SurfacePtr s;
     DrawablePtr draw;
     ScreenPtr screen;
-    int fd = -1;
+    int fds[4];
+    int nfd = 0;
     int rc;
     size_t map_size;
-    void *map;
-    PixmapPtr pixmap;
+    void *map = NULL;
+    PixmapPtr pixmap = NullPixmap;
+    Bool dri3_backed = FALSE;
     int i;
-
-    /* req_fds already set in X12SurfacePrepareFds */
 
     rc = dixLookupDrawable(&draw, cs->drawable, client, 0, DixGetAttrAccess);
     if (rc != Success)
@@ -378,54 +390,90 @@ ProcX12SurfaceCreateSurface(ClientPtr client,
 
     LEGAL_NEW_RESOURCE(cs->surface, client);
 
-    /* Consume plane FDs; G1 uses plane 0 only for the staging pixmap. */
-    fd = ReadFdFromClient(client);
-    if (fd < 0)
-        return BadMatch;
-    for (i = 1; i < cs->num_buffers; i++) {
-        int extra = ReadFdFromClient(client);
-        if (extra >= 0)
-            close(extra);
+    for (i = 0; i < cs->num_buffers; i++) {
+        fds[i] = ReadFdFromClient(client);
+        if (fds[i] < 0) {
+            while (--i >= 0)
+                close(fds[i]);
+            return BadMatch;
+        }
+        nfd++;
     }
-
-    map_size = X12SurfaceMapSize(cs->strides[0], cs->height, cs->offsets[0]);
-    if (map_size == 0 || map_size > (size_t)512 * 1024 * 1024) {
-        close(fd);
-        return BadAlloc;
-    }
-
-    map = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
-    close(fd);
-    if (map == MAP_FAILED)
-        return BadAccess;
 
     screen = draw->pScreen;
-    pixmap = (*screen->CreatePixmap)(screen, 0, 0, cs->depth, 0);
-    if (!pixmap) {
-        munmap(map, map_size);
-        return BadAlloc;
-    }
 
-    if (!(*screen->ModifyPixmapHeader)(pixmap, cs->width, cs->height, cs->depth,
-                                       cs->bpp, (int)cs->strides[0],
-                                       (char *)map + cs->offsets[0])) {
-        (*screen->DestroyPixmap)(pixmap);
-        munmap(map, map_size);
-        return BadAlloc;
+#ifdef DRI3
+    {
+        dri3_screen_priv_ptr ds = dri3_screen_priv(screen);
+        if (ds && ds->info &&
+            ((ds->info->version >= 2 && ds->info->pixmap_from_fds) ||
+             ds->info->pixmap_from_fd)) {
+            CARD32 strides[4], offsets[4];
+            for (i = 0; i < nfd; i++) {
+                strides[i] = cs->strides[i];
+                offsets[i] = cs->offsets[i];
+            }
+            rc = dri3_pixmap_from_fds(&pixmap, screen, (CARD8)nfd, fds,
+                                      cs->width, cs->height, strides, offsets,
+                                      cs->depth, cs->bpp, cs->modifier);
+            if (rc == Success && pixmap) {
+                dri3_backed = TRUE;
+                for (i = 0; i < nfd; i++)
+                    close(fds[i]);
+                nfd = 0;
+            }
+            else {
+                pixmap = NullPixmap;
+            }
+        }
+    }
+#endif
+
+    if (!dri3_backed) {
+        /* Xvfb / no DRI3: mmap plane 0 (LINEAR host-visible). */
+        map_size = X12SurfaceMapSize(cs->strides[0], cs->height, cs->offsets[0]);
+        if (map_size == 0 || map_size > (size_t)512 * 1024 * 1024) {
+            for (i = 0; i < nfd; i++)
+                close(fds[i]);
+            return BadAlloc;
+        }
+        map = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fds[0], 0);
+        for (i = 0; i < nfd; i++)
+            close(fds[i]);
+        nfd = 0;
+        if (map == MAP_FAILED)
+            return BadAccess;
+
+        pixmap = (*screen->CreatePixmap)(screen, 0, 0, cs->depth, 0);
+        if (!pixmap) {
+            munmap(map, map_size);
+            return BadAlloc;
+        }
+        if (!(*screen->ModifyPixmapHeader)(pixmap, cs->width, cs->height,
+                                           cs->depth, cs->bpp,
+                                           (int)cs->strides[0],
+                                           (char *)map + cs->offsets[0])) {
+            (*screen->DestroyPixmap)(pixmap);
+            munmap(map, map_size);
+            return BadAlloc;
+        }
     }
 
     s = calloc(1, sizeof(*s));
     if (!s) {
         (*screen->DestroyPixmap)(pixmap);
-        munmap(map, map_size);
+        if (!dri3_backed && map && map != MAP_FAILED)
+            munmap(map, map_size);
         return BadAlloc;
     }
 
     s->id = cs->surface;
     s->client = client;
     s->pixmap = pixmap;
-    s->map = map;
-    s->map_size = map_size;
+    s->map = dri3_backed ? NULL : map;
+    s->map_size = dri3_backed ? 0 : X12SurfaceMapSize(cs->strides[0], cs->height,
+                                                       cs->offsets[0]);
+    s->dri3_backed = dri3_backed;
     s->width = cs->width;
     s->height = cs->height;
     s->depth = cs->depth;
@@ -501,6 +549,10 @@ X12SurfaceCopyToWindow(X12SurfacePtr s, WindowPtr window, int16_t x_off,
     ScreenPtr screen = window->drawable.pScreen;
     GCPtr gc;
     DrawablePtr dst = &window->drawable;
+#ifdef DAMAGE
+    BoxRec box;
+    RegionRec region;
+#endif
 
     gc = GetScratchGC(dst->depth, screen);
     if (!gc)
@@ -509,6 +561,17 @@ X12SurfaceCopyToWindow(X12SurfacePtr s, WindowPtr window, int16_t x_off,
     (void)(*gc->ops->CopyArea)(&s->pixmap->drawable, dst, gc, 0, 0, s->width,
                                s->height, x_off, y_off);
     FreeScratchGC(gc);
+
+#ifdef DAMAGE
+    /* Mark composed region damaged so listeners / compositors see the update. */
+    box.x1 = x_off;
+    box.y1 = y_off;
+    box.x2 = x_off + (INT16)s->width;
+    box.y2 = y_off + (INT16)s->height;
+    RegionInit(&region, &box, 1);
+    DamageDamageRegion(dst, &region);
+    RegionUninit(&region);
+#endif
 }
 
 static int

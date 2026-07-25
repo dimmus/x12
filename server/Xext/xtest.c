@@ -59,6 +59,9 @@
 #include "eventstr.h"
 #include "inpututils.h"
 #include "extinit_priv.h"
+#ifdef XACE
+#include "xace.h"
+#endif
 
 Bool noTestExtensions = FALSE;
 
@@ -352,6 +355,15 @@ ProcXTestFakeInput(ClientPtr client)
 
         dev = GetXTestDevice(dev);
     }
+
+#ifdef XACE
+    /* X12-LEVEL: sandbox/user must not inject via XTest (DixWriteAccess). */
+    if (dev) {
+        rc = XaceHookDeviceAccess(client, dev, DixWriteAccess);
+        if (rc != Success)
+            return rc;
+    }
+#endif
 
 
     /* If the event has a time set, wait for it to pass */

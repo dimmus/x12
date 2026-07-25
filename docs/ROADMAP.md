@@ -34,12 +34,13 @@
 ## After G1 (next sequence)
 
 ```text
-A. KMS/GBM dmabuf import (non-Xvfb) + honest Syncobj/MSC on Present
+A. [PARTIAL] DRI3 pixmap_from_fds CreateSurface + Damage Present (ADR-0016); Syncobj/MSC still open
 B. Toolkit-opt-in fractional / per-monitor scaling
-C. Fine request-matrix documentation for sandbox/user/full
-D. Broader desktop bring-up (Intel/AMD + proprietary NVIDIA)
+C. [DONE] Request matrix docs + XACE enforcement (docs/X12_LEVEL_MATRIX.md)
+D. [PARTIAL] Xephyr nested smoke (tests/x12/run_xephyr.sh); real KMS still open
 E. HDR/ICC (v2)
 F. Remoting — only if a new ADR reopens E*
+G. [DONE] XML wire codegen + fuzz harness + ASAN CI job (ADR-0016)
 ```
 
 ## Explicitly after G1 (detail)

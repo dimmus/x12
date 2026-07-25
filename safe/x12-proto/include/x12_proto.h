@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "x12_proto_generated.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

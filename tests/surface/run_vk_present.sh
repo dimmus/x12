@@ -45,8 +45,13 @@ unset XAUTHORITY
 export LD_LIBRARY_PATH="$BUILD/lib/xcb${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 if ! "$BIN"; then
-  echo "vk_present: Vulkan path failed, trying --cpu fallback" >&2
-  "$BIN" --cpu
+  if [[ "${X12_ALLOW_CPU_PRESENT:-0}" == "1" ]]; then
+    echo "vk_present: Vulkan path failed, trying --cpu fallback" >&2
+    "$BIN" --cpu
+  else
+    echo "vk_present: FAIL — Vulkan/lavapipe required (set X12_ALLOW_CPU_PRESENT=1 to override)" >&2
+    exit 1
+  fi
 fi
 
 echo "surface: vk_present OK"

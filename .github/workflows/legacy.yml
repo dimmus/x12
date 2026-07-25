@@ -46,8 +46,67 @@ jobs:
       - name: Compile
         run: meson compile -C build
 
-      - name: Safe protocol front-end + drift gate
+      - name: Safe protocol front-end + drift + fuzz
         run: ./tests/safe_proto/run.sh
 
       - name: Legacy B2 corpus + X12 smokes
         run: ./tests/legacy/run.sh
+
+  asan-x12:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential meson ninja-build pkgconf zlib1g-dev libbz2-dev bzip2 \
+            libfreetype-dev libfontconfig-dev libgbm-dev libunwind-dev libjpeg-dev \
+            flex bison libinput-dev libssl-dev libncurses-dev \
+            mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
+            libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
+            libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
+            mesa-vulkan-drivers libvulkan-dev
+      - name: Configure ASAN
+        run: |
+          meson setup build-asan -Dprefix=$PWD/prefix-asan -Dbuild-debug=false \
+            -Dbuild-safe-proto=true \
+            -Dc_args='-fsanitize=address,undefined -fno-omit-frame-pointer' \
+            -Dc_link_args='-fsanitize=address,undefined'
+      - name: Compile ASAN
+        run: meson compile -C build-asan
+      - name: X12 smokes under ASAN
+        env:
+          X12_BUILD_DIR: ${{ github.workspace }}/build-asan
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1
+        run: ./tests/x12/run.sh
+
+  xephyr-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential meson ninja-build pkgconf zlib1g-dev libbz2-dev bzip2 \
+            libfreetype-dev libfontconfig-dev libgbm-dev libunwind-dev libjpeg-dev \
+            flex bison libinput-dev libssl-dev libncurses-dev \
+            mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
+            libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
+            libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl
+      - name: Configure with Xephyr
+        run: |
+          meson setup build-xephyr -Dprefix=$PWD/prefix-xephyr -Dbuild-debug=false \
+            -Dbuild-safe-proto=true -Dxephyr=true
+      - name: Compile
+        run: meson compile -C build-xephyr
+      - name: Xephyr nested smoke
+        env:
+          X12_BUILD_DIR: ${{ github.workspace }}/build-xephyr
+        run: ./tests/x12/run_xephyr.sh
