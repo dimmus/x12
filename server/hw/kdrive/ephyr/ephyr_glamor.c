@@ -103,6 +103,67 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
  * linked into this kdrive binary; real KMS/GBM scanout stays a DRM DDX
  * concern (ADR-0018).
  */
+typedef struct ephyr_mmap_pixmap {
+    PixmapPtr pixmap;
+    void *map;
+    size_t map_size;
+    DestroyPixmapProcPtr saved_destroy;
+    struct ephyr_mmap_pixmap *next;
+} ephyr_mmap_pixmap_rec;
+
+static ephyr_mmap_pixmap_rec *ephyr_mmap_pixmaps;
+static DevPrivateKeyRec ephyr_mmap_screen_key;
+
+typedef struct {
+    DestroyPixmapProcPtr destroy_pixmap;
+} ephyr_mmap_screen_priv_rec;
+
+static Bool
+ephyr_destroy_mmap_pixmap(PixmapPtr pixmap)
+{
+    ScreenPtr screen = pixmap->drawable.pScreen;
+    ephyr_mmap_screen_priv_rec *sp =
+        dixLookupPrivate(&screen->devPrivates, &ephyr_mmap_screen_key);
+    ephyr_mmap_pixmap_rec **prev, *ent;
+    Bool ret;
+
+    for (prev = &ephyr_mmap_pixmaps; *prev; prev = &(*prev)->next) {
+        if ((*prev)->pixmap != pixmap)
+            continue;
+        ent = *prev;
+        *prev = ent->next;
+        munmap(ent->map, ent->map_size);
+        free(ent);
+        break;
+    }
+
+    if (!sp || !sp->destroy_pixmap)
+        return TRUE;
+    screen->DestroyPixmap = sp->destroy_pixmap;
+    ret = (*screen->DestroyPixmap)(pixmap);
+    screen->DestroyPixmap = ephyr_destroy_mmap_pixmap;
+    return ret;
+}
+
+static Bool
+ephyr_ensure_mmap_destroy_hook(ScreenPtr screen)
+{
+    ephyr_mmap_screen_priv_rec *sp;
+
+    if (!dixPrivateKeyRegistered(&ephyr_mmap_screen_key) &&
+        !dixRegisterPrivateKey(&ephyr_mmap_screen_key, PRIVATE_SCREEN,
+                               sizeof(ephyr_mmap_screen_priv_rec)))
+        return FALSE;
+    sp = dixLookupPrivate(&screen->devPrivates, &ephyr_mmap_screen_key);
+    if (!sp)
+        return FALSE;
+    if (!sp->destroy_pixmap) {
+        sp->destroy_pixmap = screen->DestroyPixmap;
+        screen->DestroyPixmap = ephyr_destroy_mmap_pixmap;
+    }
+    return TRUE;
+}
+
 static PixmapPtr
 ephyr_pixmap_from_fds(ScreenPtr screen,
                       CARD8 num_fds,
@@ -119,12 +180,15 @@ ephyr_pixmap_from_fds(ScreenPtr screen,
     void *map;
     size_t map_size;
     uint64_t linear = 0;
+    ephyr_mmap_pixmap_rec *ent;
 
     if (num_fds < 1 || !fds || !strides || !offsets)
         return NULL;
     if (modifier != linear && modifier != (uint64_t)~0ull)
         return NULL;
     if (bpp != 32 || strides[0] < (CARD32)width * 4)
+        return NULL;
+    if (!ephyr_ensure_mmap_destroy_hook(screen))
         return NULL;
 
     map_size = (size_t)offsets[0] + (size_t)strides[0] * (size_t)height;
@@ -146,9 +210,18 @@ ephyr_pixmap_from_fds(ScreenPtr screen,
         munmap(map, map_size);
         return NULL;
     }
-    /* Leak map until pixmap destroy — acceptable for nest smoke; GBM path
-     * will own BO lifetime when linked. */
-    (void)map;
+
+    ent = calloc(1, sizeof(*ent));
+    if (!ent) {
+        (*screen->DestroyPixmap)(pixmap);
+        munmap(map, map_size);
+        return NULL;
+    }
+    ent->pixmap = pixmap;
+    ent->map = map;
+    ent->map_size = map_size;
+    ent->next = ephyr_mmap_pixmaps;
+    ephyr_mmap_pixmaps = ent;
     return pixmap;
 }
 
