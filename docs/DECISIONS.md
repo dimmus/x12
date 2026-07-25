@@ -28,6 +28,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0011](adr/0011-rust-protocol-frontend.md) | Rust protocol front-end | **Accepted** | 2026-07-25 | ROADMAP step 6; `safe/x12-proto` |
 | [ADR-0012](adr/0012-surface-stub-and-safe-link.md) | Surface stub + linked Rust decode | **Accepted** | 2026-07-25 | Pre–step 7; QueryVersion live |
 | [ADR-0013](adr/0013-xvfb-compositor-vulkan.md) | Xvfb compositor + Vulkan client | **Accepted** | 2026-07-25 | ROADMAP step 7; lavapipe/memfd |
+| [ADR-0014](adr/0014-g1-trim-legacy-surface.md) | Trim G1 defaults; split X12 smokes | **Accepted** | 2026-07-25 | Keep B2 gate; drop unused defaults |
 
 ---
 
@@ -54,6 +55,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-17 | Protocol front-end language = **Rust** (`safe/x12-proto`); C ABI for dix hookup |
 | D-ACC-18 | X12-SURFACE requests decode-first via linked Rust; QueryVersion live |
 | D-ACC-19 | Xvfb Present = mmap LINEAR + CopyArea; Vulkan client via lavapipe→memfd (G1); Syncobj still BadImplementation |
+| D-ACC-20 | G1 defaults: Xvfb only (no Xnest/Xephyr); toy demos/fontsrv/intel/Xprint/XEvie off; X12 smokes in `tests/x12/` |
 
 ---
 
@@ -80,3 +82,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Safe front-end | ADR-0011; Rust `safe/x12-proto`; ROADMAP step 6 |
 | 2026-07-25 | Step 7 prep | ADR-0012; ABI out-struct; X12-SURFACE stub; drift + QueryVersion smoke |
 | 2026-07-25 | Compositor + Vulkan | ADR-0013; mmap Present; lavapipe vk_present demo |
+| 2026-07-25 | Trim legacy surface | ADR-0014; slim meson defaults; split X12 smokes |

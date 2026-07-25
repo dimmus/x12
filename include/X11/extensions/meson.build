@@ -87,11 +87,11 @@ headers = files(
     'XvMC.h',
     'XvMCproto.h',
     'Xvproto.h',
-    'xwaylandproto.h',
 )
 
 if get_option('build-xproto-legacy')
     headers += files(
+        'xwaylandproto.h', # platform leftover; XWayland DDX is a non-goal (H2)
         'evieproto.h',
         'fontcache.h',
         'fontcacheP.h',

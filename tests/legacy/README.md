@@ -1,26 +1,29 @@
-# Legacy test harness (contract)
+# Legacy test harness (B2 corpus gate)
 
-Pass-through gate for the **X11R8** corpus — see [`docs/LEGACY_TESTS.md`](../../docs/LEGACY_TESTS.md).
+Pass-through gate for the **X11R8** corpus — see [`docs/LEGACY_TESTS.md`](../../docs/LEGACY_TESTS.md)
+and [ADR-0004](../../docs/adr/0004-legacy-test-gate.md).
 
 ## Locked corpus (B2)
 
-- X11R8 meson test suite
+- X11R8 meson unit tests (selected non-piglit targets)
 - xauth scripts
 - x11perf
 - xcmstest
 
-## Status
-
-Harness placeholder until the X11R8-derived server tree is imported.
+## Entry point
 
 ```sh
 ./tests/legacy/run.sh
-# later:
-meson test -C build --suite legacy
 ```
+
+This runs the B2 corpus, then delegates to [`../x12/run.sh`](../x12/run.sh) for
+X12-native G1 smokes (deny_keylog, surface QueryVersion, vk_present). Those
+smokes are **not** part of the locked corpus; they ride along so G1 stays green
+in one CI job.
 
 ## Rules
 
-- Do not delete failing coverage to go green — fix or ADR + Dimmus ack.
-- New skips need an issue link in the skip reason.
-- G1 security demo (`tests/security/` later) complements this suite; it does not replace it.
+- Do not delete failing B2 coverage to go green — fix or ADR + Dimmus ack.
+- New corpus skips need an issue link in the skip reason.
+- X12-only tests live under `tests/{security,surface,x12}/`; do not rename the
+  B2 gate away without a new ADR.

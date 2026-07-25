@@ -22,7 +22,8 @@
 
 - Provenance: ADR-0008 / `docs/vendor/X11R8-README.md`
 - Meson: `meson.options` (Meson ≥ 1.1); needs `cargo` for X12-SURFACE server link
-- Legacy harness: `./tests/legacy/run.sh` (+ deny_keylog + QueryVersion + vk_present)
+- Legacy harness: `./tests/legacy/run.sh` (B2 corpus → `./tests/x12/run.sh`)
+- G1 defaults slimmed: Xvfb only; toy demos / nested DDX off (ADR-0014)
 - Levels: `-client-level`, `-sandbox-clients` (see `docs/BUILD.md`); bridged to Rust via `X12LevelToProto`
 - Surfaces: `proto/xcb/src/x12_surface.xml`; compositor `server/Xext/x12surface.c` (ADR-0013)
 - Safe front-end: `safe/x12-proto` (ADR-0011/0012); `./tests/safe_proto/run.sh` (+ drift check)

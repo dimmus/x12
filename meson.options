@@ -1,9 +1,9 @@
 ## BUILD
 option('build-debug',           type: 'boolean', value: false) # x12: verbose DEBUG/XNL_DEBUG breaks Xt clients
-option('build-font-server',     type: 'boolean', value: true )
+option('build-font-server',     type: 'boolean', value: false) # x12 G1: unused (Xvfb)
 option('build-input-evdev',     type: 'boolean', value: false) # replaced by libinput
 option('build-input-synaptics', type: 'boolean', value: false) # replaced by libinput
-option('build-video-intel',     type: 'boolean', value: true )
+option('build-video-intel',     type: 'boolean', value: false) # x12 G1: Xorg driver, not Xvfb gate
 option('build-static-epoxy',    type: 'boolean', value: true )
 option('build-static-pixman',   type: 'boolean', value: false)
 option('build-xproto-legacy',   type: 'boolean', value: false)
@@ -26,8 +26,8 @@ option('zfile-stat',            type: 'boolean', value: true,                   
 option('sxpm',                  type: 'boolean', value: true,                                        description: '[xpm] Build programm to show XPM files.')
 
 ## xserver
-option('xnest',                 type: 'boolean', value: true,                                        description: 'Enable Xnest nested X server')
-option('xephyr',                type: 'boolean', value: true,                                        description: 'Enable Xephyr nested X server')
+option('xnest',                 type: 'boolean', value: false,                                       description: 'Enable Xnest nested X server (off for G1; Xvfb only)')
+option('xephyr',                type: 'boolean', value: false,                                       description: 'Enable Xephyr nested X server (off for G1; Xvfb only)')
 option('xvfb',                  type: 'boolean', value: true,                                        description: 'Enable Xvfb X server')
 
 option('log_dir',               type: 'string')
@@ -100,11 +100,11 @@ option('resource',              type: 'boolean', value: true)
 option('shape',                 type: 'boolean', value: true)
 option('shm',                   type: 'boolean', value: true)
 option('sync',                  type: 'boolean', value: true)
-option('xevie',                 type: 'boolean', value: true)
+option('xevie',                 type: 'boolean', value: false) # legacy XEvIE; off for G1
 option('xfree86_dri',           type: 'boolean', value: true)
 option('xfixes',                type: 'boolean', value: true)
 option('xinput',                type: 'boolean', value: true)
-option('xprint',                type: 'boolean', value: true)
+option('xprint',                type: 'boolean', value: false) # legacy Xprint; off for G1
 option('selinux',               type: 'boolean', value: true)
 option('xtest',                 type: 'boolean', value: true)
 option('ge',                    type: 'boolean', value: true)
@@ -119,16 +119,16 @@ option('xli',                   type: 'boolean', value: false)
 option('xbindkeys',             type: 'boolean', value: true)
 
 ## demo
-option('demo-x11perf',          type: 'boolean', value: true )
-option('demo-xcmstest',         type: 'boolean', value: true ) # x12 legacy corpus
-option('demo-ico',              type: 'boolean', value: true )
-option('demo-maze',             type: 'boolean', value: true )
-option('demo-puzzle',           type: 'boolean', value: true )
-option('demo-xeyes',            type: 'boolean', value: true )
-option('demo-xgamma',           type: 'boolean', value: true )
-option('demo-xev',              type: 'boolean', value: true )
+option('demo-x11perf',          type: 'boolean', value: true )  # B2 corpus
+option('demo-xcmstest',         type: 'boolean', value: true )  # B2 corpus
+option('demo-ico',              type: 'boolean', value: false)  # toy; not in G1 gate
+option('demo-maze',             type: 'boolean', value: false)
+option('demo-puzzle',           type: 'boolean', value: false)
+option('demo-xeyes',            type: 'boolean', value: false)
+option('demo-xgamma',           type: 'boolean', value: false)
+option('demo-xev',              type: 'boolean', value: false)
 option('demo-xgas',             type: 'boolean', value: false) # legacy
-option('demo-xgc',              type: 'boolean', value: true )
+option('demo-xgc',              type: 'boolean', value: false)
 
 ## static/epoxy
 option('egl',                   type: 'boolean', value: true)

@@ -292,8 +292,8 @@ ProcX12SurfaceQueryCapabilities(ClientPtr client,
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-        .capabilities = X12SurfaceCapabilityMultiplane |
-                        X12SurfaceCapabilityModifiers,
+        /* G1 Xvfb path: LINEAR single-plane mmap. Syncobj/Multiplane deferred. */
+        .capabilities = X12SurfaceCapabilityModifiers,
     };
 
     (void)decoded;
@@ -529,6 +529,11 @@ ProcX12SurfacePresent(ClientPtr client, const x12_proto_surface_decoded_t *decod
     if (!s->attached)
         s->attached = window;
     if (s->attached != window)
+        return BadMatch;
+
+    /* Capability.Syncobj is off on Xvfb — reject explicit timeline points. */
+    if (p->acquire_syncobj || p->release_syncobj || p->acquire_point ||
+        p->release_point)
         return BadMatch;
 
     X12SurfaceCopyToWindow(s, window, p->x_off, p->y_off);
