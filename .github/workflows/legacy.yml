@@ -46,8 +46,110 @@ jobs:
       - name: Compile
         run: meson compile -C build
 
-      - name: Safe protocol front-end + drift gate
+      - name: Safe protocol front-end + drift + fuzz
         run: ./tests/safe_proto/run.sh
 
       - name: Legacy B2 corpus + X12 smokes
         run: ./tests/legacy/run.sh
+
+  asan-x12:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential meson ninja-build pkgconf zlib1g-dev libbz2-dev bzip2 \
+            libfreetype-dev libfontconfig-dev libgbm-dev libunwind-dev libjpeg-dev \
+            flex bison libinput-dev libssl-dev libncurses-dev \
+            mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
+            libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
+            libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
+            mesa-vulkan-drivers libvulkan-dev
+          if ! pkg-config --exists bzip2; then
+            sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
+          prefix=/usr
+          exec_prefix=/usr
+          libdir=/usr/lib/x86_64-linux-gnu
+          includedir=/usr/include
+          Name: bzip2
+          Description: bzip2 compression library
+          Version: 1.0.8
+          Libs: -L${libdir} -lbz2
+          Cflags: -I${includedir}
+          EOF
+          fi
+      - name: Configure ASAN
+        env:
+          # AddressSanitizer only — UBSan + -Werror=nonnull trips third-party mouse_lnx.c
+          CFLAGS: -fsanitize=address -fno-omit-frame-pointer -Wno-error=nonnull
+          LDFLAGS: -fsanitize=address
+        run: |
+          # ADR-0017: X11 toolchain is compat-only — use system xkbcomp, not
+          # ASan-instrumented in-tree xkbcomp (ODR fights with libX11).
+          meson setup build-asan -Dprefix=$PWD/prefix-asan -Dbuild-debug=false \
+            -Dbuild-safe-proto=true -Dxkb_bin_dir=/usr/bin
+      - name: Compile ASAN (Xvfb + libs for X12 smokes)
+        run: |
+          ninja -C build-asan \
+            server/hw/vfb/Xvfb \
+            lib/src/x11/libX11.so.6.4.0 \
+            lib/ext/xtst/libXtst.so.6.1.0 \
+            lib/ext/xi/libXi.so.6.1.0 \
+            lib/xcb/libxcb.so.2.0.1 \
+            lib/src/xau/libXau.so.6.0.0 \
+            lib/src/xdmcp/libXdmcp.so.6.0.0 \
+            lib/ext/xext/libXext.so.6.4.0 \
+            safe/libx12_proto.a
+      - name: X12 smokes under ASAN
+        env:
+          X12_BUILD_DIR: ${{ github.workspace }}/build-asan
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
+          CC: gcc
+          CFLAGS: -fsanitize=address -fno-omit-frame-pointer
+          LDFLAGS: -fsanitize=address
+        run: ./tests/x12/run.sh
+
+  xephyr-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential meson ninja-build pkgconf zlib1g-dev libbz2-dev bzip2 \
+            libfreetype-dev libfontconfig-dev libgbm-dev libunwind-dev libjpeg-dev \
+            flex bison libinput-dev libssl-dev libncurses-dev \
+            mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
+            libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
+            libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
+            mesa-vulkan-drivers libvulkan-dev
+          if ! pkg-config --exists bzip2; then
+            sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
+          prefix=/usr
+          exec_prefix=/usr
+          libdir=/usr/lib/x86_64-linux-gnu
+          includedir=/usr/include
+          Name: bzip2
+          Description: bzip2 compression library
+          Version: 1.0.8
+          Libs: -L${libdir} -lbz2
+          Cflags: -I${includedir}
+          EOF
+          fi
+      - name: Configure with Xephyr
+        run: |
+          meson setup build-xephyr -Dprefix=$PWD/prefix-xephyr -Dbuild-debug=false \
+            -Dbuild-safe-proto=true -Dxephyr=true
+      - name: Compile
+        run: meson compile -C build-xephyr
+      - name: Xephyr nested smoke
+        env:
+          X12_BUILD_DIR: ${{ github.workspace }}/build-xephyr
+        run: ./tests/x12/run_xephyr.sh

@@ -29,7 +29,10 @@ if get_option('build-safe-proto')
       'x12-proto/src/frame.rs',
       'x12-proto/src/level.rs',
       'x12-proto/src/x12_surface.rs',
+      'x12-proto/src/generated_wire.rs',
       'x12-proto/include/x12_proto.h',
+      'x12-proto/include/x12_proto_generated.h',
+      'x12-proto/tools/gen_wire.py',
     )
 
     x12_proto_a = custom_target(

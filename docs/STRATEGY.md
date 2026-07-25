@@ -10,7 +10,7 @@
 
 ## 1. Positioning
 
-X12 is not “Wayland with X branding.” It is an **independent direct successor** of the X Window System: keep protocol clarity, toolability, and the WM/toolkit ecosystem; replace ambient client trust, server-side drawing as the default path, bolted-on HiDPI, and implicit GPU sync. **Remoting is deferred** (not a v1 pillar). HDR/ICC is **v2**.
+X12 is not “Wayland with X branding,” and it is **not** an X11 maintenance fork competing on classic X.Org features. It is an **independent successor**: native X12 protocol (X12-SURFACE, levels, compositor) is the product; classic X11/XCB remains a **compat and test** surface so existing user apps keep working (ADR-0017). Replace ambient client trust, server-side drawing as the default path, bolted-on HiDPI, and implicit GPU sync. **Remoting is deferred** (not a v1 pillar). HDR/ICC is **v2**.
 
 Related prior art in this org:
 

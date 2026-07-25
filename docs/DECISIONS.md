@@ -30,6 +30,8 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0013](adr/0013-xvfb-compositor-vulkan.md) | Xvfb compositor + Vulkan client | **Accepted** | 2026-07-25 | ROADMAP step 7; lavapipe/memfd |
 | [ADR-0014](adr/0014-g1-trim-legacy-surface.md) | Trim G1 defaults; split X12 smokes | **Accepted** | 2026-07-25 | Keep B2 gate; drop unused defaults |
 | [ADR-0015](adr/0015-g1-milestone-tag.md) | Tag milestone G1 | **Accepted** | 2026-07-25 | Tag `g1`; version `12.0.0-g1` |
+| [ADR-0016](adr/0016-best-of-best-post-g1.md) | Post-G1 best-of-best slice | **Accepted** | 2026-07-25 | Matrix, DRI3 path, fuzz/ASAN, Xephyr |
+| [ADR-0017](adr/0017-x11-compat-test-only.md) | X11 compat/test only | **Accepted** | 2026-07-25 | Native = X12-SURFACE; B2 stays |
 
 ---
 
@@ -58,6 +60,8 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-19 | Xvfb Present = mmap LINEAR + CopyArea; Vulkan client via lavapipe→memfd (G1); Syncobj still BadImplementation |
 | D-ACC-20 | G1 defaults: Xvfb only (no Xnest/Xephyr); toy demos/fontsrv/intel/Xprint/XEvie off; X12 smokes in `tests/x12/` |
 | D-ACC-21 | Milestone G1 tagged `g1`; meson version `12.0.0-g1`; evidence in `docs/G1.md` |
+| D-ACC-22 | Post-G1: X12-LEVEL matrix + DRI3 CreateSurface + XML wire codegen/fuzz + ASAN/Xephyr CI |
+| D-ACC-23 | X11/XCB classic wire = compat + user-app/B2 tests only; product investment is native X12 (ADR-0017) |
 
 ---
 
@@ -86,3 +90,5 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Compositor + Vulkan | ADR-0013; mmap Present; lavapipe vk_present demo |
 | 2026-07-25 | Trim legacy surface | ADR-0014; slim meson defaults; split X12 smokes |
 | 2026-07-25 | Tag G1 | ADR-0015; tag `g1`; `docs/G1.md` |
+| 2026-07-25 | Best-of-best slice | ADR-0016; matrix; DRI3 path; fuzz/ASAN; Xephyr |
+| 2026-07-25 | X11 scope | ADR-0017; X11 = compat/test; native X12 first |

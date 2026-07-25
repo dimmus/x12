@@ -10,6 +10,9 @@ if ! command -v cargo >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "==> XML→wire codegen"
+python3 safe/x12-proto/tools/gen_wire.py
+
 echo "==> cargo test (safe/x12-proto)"
 cargo test --manifest-path safe/x12-proto/Cargo.toml --locked
 
@@ -19,5 +22,8 @@ cc -std=c11 -Wall -Werror \
   tests/safe_proto/drift_check.c \
   -o /tmp/x12-drift-check
 /tmp/x12-drift-check
+
+echo "==> decode fuzz harness"
+./tests/safe_proto/run_fuzz.sh
 
 echo "safe_proto: PASSED"

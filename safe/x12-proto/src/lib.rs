@@ -1,16 +1,14 @@
-//! Memory-safe X12 protocol front-end (ROADMAP step 6 / ADR-0011).
+//! Memory-safe X12 protocol front-end (ADR-0011 / ADR-0016).
 //!
-//! Decodes and validates untrusted request byte streams for the native
-//! **X12-SURFACE** path before they reach the C server core. Hierarchical
-//! client levels (ADR-0003) are enforced here as a policy gate.
-//!
-//! This is a spike: not yet wired into the Xvfb request loop. The C ABI in
-//! [`ffi`] is the intended integration surface for step 7+.
+//! Decodes and validates untrusted request byte streams for **X12-SURFACE**
+//! before they reach the C server core. Linked into Xvfb/Xorg via the C ABI
+//! in [`ffi`]. Wire sizes/opcodes: `tools/gen_wire.py` → [`generated_wire`].
 
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod ffi;
 pub mod frame;
+pub mod generated_wire;
 pub mod level;
 pub mod x12_surface;
 

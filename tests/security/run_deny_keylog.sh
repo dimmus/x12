@@ -9,12 +9,16 @@ CC="${CC:-cc}"
 
 need() { [[ -x "$1" ]] || { echo "missing $1" >&2; exit 1; }; }
 need "$XVFB"
+# xkbcomp: in-tree or system (ASAN CI uses -Dxkb_bin_dir=/usr/bin; ADR-0017)
+[[ -x "$BUILD/app/xkbcomp/xkbcomp" || -x /usr/bin/xkbcomp ]] || {
+  echo "missing xkbcomp (build app/xkbcomp or install x11-xkb-utils)" >&2
+  exit 1
+}
 
 BIN="$BUILD/tests/security/deny_keylog"
 mkdir -p "$BUILD/tests/security"
 
 INC=(-I"$ROOT/include" -I"$BUILD")
-# Prefer in-tree libs via rpath from build tree
 LIBS=(
   -L"$BUILD/lib/src/x11" -lX11
   -L"$BUILD/lib/ext/xtst" -lXtst
@@ -26,30 +30,41 @@ LIBS=(
   -Wl,-rpath,"$BUILD/lib/src/x11:$BUILD/lib/ext/xtst:$BUILD/lib/ext/xi:$BUILD/lib/xcb:$BUILD/lib/src/xau:$BUILD/lib/src/xdmcp:$BUILD/lib/ext/xext"
 )
 
-"$CC" -O2 -g "$ROOT/tests/security/deny_keylog.c" -o "$BIN" "${INC[@]}" "${LIBS[@]}"
+# shellcheck disable=SC2086
+"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/security/deny_keylog.c" -o "$BIN" "${INC[@]}" "${LIBS[@]}"
 
 DISP_NUM=91
+LOG=/tmp/x12-deny-keylog-xvfb.log
 "$XVFB" ":$DISP_NUM" -ac -screen 0 800x600x24 \
   -extension XFree86-Bigfont \
   -fp /usr/share/fonts/X11/misc \
   -client-level full \
   -sandbox-clients 2 \
-  >/tmp/x12-deny-keylog-xvfb.log 2>&1 &
+  >"$LOG" 2>&1 &
 XVFB_PID=$!
 cleanup() { kill "$XVFB_PID" 2>/dev/null || true; }
 trap cleanup EXIT
 
-for _ in $(seq 1 20); do
+for _ in $(seq 1 80); do
   [[ -S "/tmp/.X11-unix/X${DISP_NUM}" ]] && break
+  if ! kill -0 "$XVFB_PID" 2>/dev/null; then
+    echo "Xvfb exited early" >&2
+    cat "$LOG" >&2 || true
+    exit 1
+  fi
   sleep 0.1
 done
 [[ -S "/tmp/.X11-unix/X${DISP_NUM}" ]] || {
   echo "Xvfb failed" >&2
-  cat /tmp/x12-deny-keylog-xvfb.log >&2
+  cat "$LOG" >&2
   exit 1
 }
 
 export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
-"$BIN"
+if ! "$BIN"; then
+  echo "deny_keylog binary failed; Xvfb log:" >&2
+  cat "$LOG" >&2 || true
+  exit 1
+fi
 echo "security: deny_keylog OK"

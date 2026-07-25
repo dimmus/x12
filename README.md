@@ -21,6 +21,7 @@ meson compile -C build
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
 **Status:** achieved — git tag `g1` ([docs/G1.md](docs/G1.md), ADR-0015).  
+Post-G1 hardening: request matrix, DRI3 CreateSurface, fuzz/ASAN, Xephyr smoke (ADR-0016).  
 Verify: `./tests/legacy/run.sh` (B2 + X12 smokes). Defaults: Xvfb-focused (ADR-0014).
 
 Build uses **`meson.options`** (Meson ≥ 1.1). Version: `12.0.0-g1`.
@@ -30,10 +31,11 @@ Build uses **`meson.options`** (Meson ≥ 1.1). Version: `12.0.0-g1`.
 | Pillar | Choice |
 |---|---|
 | Product | Protocol + server, modern Linux desktop, independent line |
-| Wire | Native X11 + extensions in place; rebuild OK |
+| Native path | **X12-SURFACE** + levels + compositor (not “better X.Org”) |
+| X11 wire | **Compat/test only** — keep user apps + B2 corpus green (ADR-0017) |
 | Security | Hierarchical `sandbox` / `user` / `full` (default **full**) |
 | Graphics | API-agnostic dmabuf; built-in compositor; HDR v2 |
-| Legacy gate | X11R8 meson / xauth / x11perf / xcmstest |
+| App gate | X11R8 meson / xauth / x11perf / xcmstest (+ `tests/x12/`) |
 
 ## Docs
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Xvfb smoke: X12-SURFACE QueryVersion via in-tree libxcb (ADR-0012).
+# Post-G1: X12-LEVEL request matrix (GetImage / props / XTest / keylog).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -14,21 +14,31 @@ need "$XVFB"
   exit 1
 }
 
-BIN="$BUILD/tests/surface/query_version"
-mkdir -p "$BUILD/tests/surface"
-
-XCB_SO="$BUILD/lib/xcb/libxcb.so"
-[[ -e "$XCB_SO" ]] || { echo "missing $XCB_SO" >&2; exit 1; }
+BIN="$BUILD/tests/security/deny_matrix"
+mkdir -p "$BUILD/tests/security"
 
 INC=(-I"$ROOT/include" -I"$BUILD")
-# shellcheck disable=SC2086
-"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/surface/query_version.c" -o "$BIN" "${INC[@]}" \
-  "$XCB_SO" -Wl,-rpath,"$BUILD/lib/xcb"
+LIBS=(
+  -L"$BUILD/lib/src/x11" -lX11
+  -L"$BUILD/lib/ext/xtst" -lXtst
+  -L"$BUILD/lib/ext/xi" -lXi
+  -L"$BUILD/lib/xcb" -lxcb
+  -L"$BUILD/lib/src/xau" -lXau
+  -L"$BUILD/lib/src/xdmcp" -lXdmcp
+  -L"$BUILD/lib/ext/xext" -lXext
+  -Wl,-rpath,"$BUILD/lib/src/x11:$BUILD/lib/ext/xtst:$BUILD/lib/ext/xi:$BUILD/lib/xcb:$BUILD/lib/src/xau:$BUILD/lib/src/xdmcp:$BUILD/lib/ext/xext"
+)
 
-DISP_NUM=96
-LOG=/tmp/x12-surface-qv-xvfb.log
-"$XVFB" ":$DISP_NUM" -ac -screen 0 640x480x24 \
+# shellcheck disable=SC2086
+"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/security/deny_matrix.c" -o "$BIN" "${INC[@]}" "${LIBS[@]}"
+
+DISP_NUM=92
+LOG=/tmp/x12-deny-matrix-xvfb.log
+"$XVFB" ":$DISP_NUM" -ac -screen 0 800x600x24 \
   -extension XFree86-Bigfont \
+  -fp /usr/share/fonts/X11/misc \
+  -client-level full \
+  -sandbox-clients 2 \
   >"$LOG" 2>&1 &
 XVFB_PID=$!
 cleanup() { kill "$XVFB_PID" 2>/dev/null || true; }
@@ -51,10 +61,9 @@ done
 
 export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
-export LD_LIBRARY_PATH="$BUILD/lib/xcb${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 if ! "$BIN"; then
-  echo "query_version failed; Xvfb log:" >&2
+  echo "deny_matrix binary failed; Xvfb log:" >&2
   cat "$LOG" >&2 || true
   exit 1
 fi
-echo "surface: QueryVersion OK"
+echo "security: deny_matrix OK"

@@ -13,6 +13,12 @@ if ! "$ROOT/tests/security/run_deny_keylog.sh"; then
   FAIL=1
 fi
 
+echo "x12: security deny_matrix"
+if ! "$ROOT/tests/security/run_deny_matrix.sh"; then
+  echo "x12: FAIL — deny_matrix" >&2
+  FAIL=1
+fi
+
 echo "x12: surface QueryVersion"
 if ! "$ROOT/tests/surface/run_query_version.sh"; then
   echo "x12: FAIL — surface QueryVersion" >&2
