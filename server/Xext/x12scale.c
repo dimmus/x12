@@ -1,6 +1,6 @@
 /*
  * X12-SCALE: toolkit-opt-in fractional / per-monitor scaling (ADR-0005 D4).
- * Stub: reports unity scale; records OptIn per window. No silent blur-scale.
+ * Stub: reports unity scale; records OptIn per window XID. No silent blur-scale.
  */
 #include <dix-config.h>
 
@@ -26,7 +26,7 @@
 
 typedef struct _X12ScaleOptIn
 {
-    WindowPtr window;
+    XID window;
     Bool enabled;
     struct _X12ScaleOptIn *next;
 } X12ScaleOptInRec, *X12ScaleOptInPtr;
@@ -34,7 +34,7 @@ typedef struct _X12ScaleOptIn
 static X12ScaleOptInPtr x12ScaleOptIns;
 
 static X12ScaleOptInPtr
-X12ScaleFindOptIn(WindowPtr window)
+X12ScaleFindOptIn(XID window)
 {
     X12ScaleOptInPtr st;
 
@@ -43,6 +43,22 @@ X12ScaleFindOptIn(WindowPtr window)
             return st;
     }
     return NULL;
+}
+
+static void
+X12ScaleForgetWindow(XID window)
+{
+    X12ScaleOptInPtr *prev, doomed;
+
+    for (prev = &x12ScaleOptIns; *prev;) {
+        if ((*prev)->window != window) {
+            prev = &(*prev)->next;
+            continue;
+        }
+        doomed = *prev;
+        *prev = doomed->next;
+        free(doomed);
+    }
 }
 
 static int
@@ -117,16 +133,21 @@ ProcX12ScaleOptIn(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    st = X12ScaleFindOptIn(window);
+    if (!stuff->enable) {
+        X12ScaleForgetWindow(window->drawable.id);
+        return Success;
+    }
+
+    st = X12ScaleFindOptIn(window->drawable.id);
     if (!st) {
         st = calloc(1, sizeof(*st));
         if (!st)
             return BadAlloc;
-        st->window = window;
+        st->window = window->drawable.id;
         st->next = x12ScaleOptIns;
         x12ScaleOptIns = st;
     }
-    st->enabled = stuff->enable ? TRUE : FALSE;
+    st->enabled = TRUE;
     return Success;
 }
 

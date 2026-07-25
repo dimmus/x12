@@ -45,10 +45,7 @@
 
 /* ~60Hz software compositor clock when no KMS vblank is available. */
 #define X12_SURFACE_FAKE_INTERVAL_US 16667ull
-
-#define X12SurfacePresentOptionAsync    1
-#define X12SurfacePresentOptionCopy     2
-#define X12SurfacePresentOptionTearFree 4
+#define X12_SURFACE_MAX_DELAY_MS     60000
 
 static int x12SurfaceErrorBase;
 static int x12SurfaceReqCode;
@@ -71,7 +68,7 @@ typedef struct _X12Surface
     uint32_t format;
     uint64_t modifier;
     uint32_t stride;
-    WindowPtr attached;
+    XID attached_window; /* 0 = none; avoid dangling WindowPtr */
     struct _X12Surface *next;
 } X12SurfaceRec, *X12SurfacePtr;
 
@@ -87,7 +84,7 @@ typedef struct _X12SurfaceEvent
 {
     XID id;
     ClientPtr client;
-    WindowPtr window;
+    XID window; /* window XID; re-validated when sending */
     CARD32 mask;
     struct _X12SurfaceEvent *next;
 } X12SurfaceEventRec, *X12SurfaceEventPtr;
@@ -95,8 +92,8 @@ typedef struct _X12SurfaceEvent
 typedef struct _X12PendingPresent
 {
     ClientPtr client;
-    WindowPtr window;
-    X12SurfacePtr surface;
+    XID window;
+    XID surface;
     CARD32 serial;
     int16_t x_off;
     int16_t y_off;
@@ -115,30 +112,58 @@ static X12PendingPresentPtr x12PendingPresents;
 static void X12SurfaceExecutePresent(X12PendingPresentPtr pp, uint64_t ust,
                                      uint64_t msc);
 static void X12SurfaceFlushPendingForMsc(ScreenPtr screen, uint64_t msc);
+static void X12SurfaceAbortPending(Bool (*match)(X12PendingPresentPtr, void *),
+                                   void *arg);
+
+static Bool
+X12PendingMatchSurface(X12PendingPresentPtr pp, void *arg)
+{
+    return pp->surface == *(XID *)arg;
+}
+
+static Bool
+X12PendingMatchClient(X12PendingPresentPtr pp, void *arg)
+{
+    return pp->client == (ClientPtr)arg;
+}
+
+static Bool
+X12PendingMatchWindow(X12PendingPresentPtr pp, void *arg)
+{
+    return pp->window == *(XID *)arg;
+}
+
+static void
+X12SurfaceAbortPending(Bool (*match)(X12PendingPresentPtr, void *), void *arg)
+{
+    X12PendingPresentPtr *pp, doomed;
+
+    for (pp = &x12PendingPresents; *pp;) {
+        if (!match(*pp, arg)) {
+            pp = &(*pp)->next;
+            continue;
+        }
+        doomed = *pp;
+        *pp = doomed->next;
+        if (doomed->timer)
+            TimerFree(doomed->timer);
+        free(doomed);
+    }
+}
 
 static int
 X12SurfaceFreeSurface(void *data, XID id)
 {
     X12SurfacePtr s = data;
     X12SurfacePtr *prev;
-    X12PendingPresentPtr *pp, doomed;
+    XID sid;
 
     (void)id;
     if (!s)
         return Success;
 
-    /* Drop queued presents that still reference this surface. */
-    for (pp = &x12PendingPresents; *pp;) {
-        if ((*pp)->surface == s) {
-            doomed = *pp;
-            *pp = doomed->next;
-            if (doomed->timer)
-                TimerFree(doomed->timer);
-            free(doomed);
-            continue;
-        }
-        pp = &(*pp)->next;
-    }
+    sid = s->id;
+    X12SurfaceAbortPending(X12PendingMatchSurface, &sid);
 
     for (prev = &x12Surfaces; *prev; prev = &(*prev)->next) {
         if (*prev == s) {
@@ -346,7 +371,7 @@ X12SurfaceScreenHasDri3Import(ScreenPtr screen)
     if (!screen)
         return FALSE;
     /* Xvfb never calls dri3_screen_init — key stays uninitialized. */
-    if (!dri3_screen_private_key.initialized)
+    if (!dixPrivateKeyRegistered(&dri3_screen_private_key))
         return FALSE;
     ds = dri3_screen_priv(screen);
     if (!ds || !ds->info)
@@ -382,43 +407,41 @@ X12SurfaceWindowStackDepth(WindowPtr w)
     return depth;
 }
 
-/* Higher stacking order first among siblings; deeper windows before ancestors. */
+/* Bottom paints first so higher siblings win the final CopyArea. */
 static int
-X12SurfaceComparePending(const X12PendingPresentPtr a,
-                         const X12PendingPresentPtr b)
+X12SurfaceCompareWindows(WindowPtr wa, WindowPtr wb)
 {
-    WindowPtr wa = a->window;
-    WindowPtr wb = b->window;
     WindowPtr pa, pb, sa;
 
     if (wa == wb)
         return 0;
+    if (!wa || !wb)
+        return (wa != NULL) - (wb != NULL);
 
-    /* Find common ancestor's children for sibling order. */
     pa = wa;
     pb = wb;
     while (X12SurfaceWindowStackDepth(pa) > X12SurfaceWindowStackDepth(pb))
         pa = pa->parent;
     while (X12SurfaceWindowStackDepth(pb) > X12SurfaceWindowStackDepth(pa))
         pb = pb->parent;
-    while (pa && pb && pa->parent != pb->parent) {
+    while (pa && pb && pa->parent && pb->parent && pa->parent != pb->parent) {
         pa = pa->parent;
         pb = pb->parent;
     }
-    if (pa && pb && pa->parent == pb->parent) {
-        /* Walk sibling list: later siblings are above. Bottom paints first. */
-        for (sa = pa->parent ? pa->parent->firstChild : pa; sa; sa = sa->nextSib) {
+    if (pa && pb && pa->parent && pa->parent == pb->parent) {
+        for (sa = pa->parent->firstChild; sa; sa = sa->nextSib) {
             if (sa == pa)
                 return -1; /* a under b → a first */
             if (sa == pb)
                 return 1;
         }
     }
-    return (int)((uintptr_t)wa > (uintptr_t)wb) - (int)((uintptr_t)wa < (uintptr_t)wb);
+    return (int)(wa->drawable.id > wb->drawable.id) -
+           (int)(wa->drawable.id < wb->drawable.id);
 }
 
 static void
-X12SurfaceSendComplete(WindowPtr window, XID surface, CARD32 serial, CARD8 mode,
+X12SurfaceSendComplete(XID window, XID surface, CARD32 serial, CARD8 mode,
                        uint64_t ust, uint64_t msc)
 {
     X12SurfaceEventPtr ev;
@@ -430,6 +453,8 @@ X12SurfaceSendComplete(WindowPtr window, XID surface, CARD32 serial, CARD8 mode,
             continue;
         if (!(ev->mask & X12SurfaceEventMaskCompleteNotify))
             continue;
+        if (!ev->client || ev->client->clientGone)
+            continue;
 
         memset(&cn, 0, sizeof(cn));
         cn.type = GenericEvent;
@@ -439,7 +464,7 @@ X12SurfaceSendComplete(WindowPtr window, XID surface, CARD32 serial, CARD8 mode,
         cn.evtype = X12SurfaceNotifyComplete;
         cn.mode = mode;
         cn.eid = ev->id;
-        cn.window = window->drawable.id;
+        cn.window = window;
         cn.serial = serial;
         cn.ust = ust;
         cn.msc = msc;
@@ -449,7 +474,7 @@ X12SurfaceSendComplete(WindowPtr window, XID surface, CARD32 serial, CARD8 mode,
 }
 
 static void
-X12SurfaceSendIdle(WindowPtr window, XID surface, CARD32 serial)
+X12SurfaceSendIdle(XID window, XID surface, CARD32 serial)
 {
     X12SurfaceEventPtr ev;
 
@@ -460,6 +485,8 @@ X12SurfaceSendIdle(WindowPtr window, XID surface, CARD32 serial)
             continue;
         if (!(ev->mask & X12SurfaceEventMaskIdleNotify))
             continue;
+        if (!ev->client || ev->client->clientGone)
+            continue;
 
         memset(&in, 0, sizeof(in));
         in.type = GenericEvent;
@@ -468,7 +495,7 @@ X12SurfaceSendIdle(WindowPtr window, XID surface, CARD32 serial)
         in.length = 0;
         in.evtype = X12SurfaceNotifyIdle;
         in.eid = ev->id;
-        in.window = window->drawable.id;
+        in.window = window;
         in.surface = surface;
         in.serial = serial;
         WriteEventsToClient(ev->client, 1, (xEvent *)&in);
@@ -544,28 +571,63 @@ X12SurfaceAcquireReady(ClientPtr client, XID id, uint64_t point, int *err)
     return FALSE;
 }
 
+static Bool
+X12SurfaceClientAlive(ClientPtr client)
+{
+    return client && !client->clientGone;
+}
+
 static void
 X12SurfaceExecutePresent(X12PendingPresentPtr pp, uint64_t ust, uint64_t msc)
 {
+    WindowPtr window = NullWindow;
+    X12SurfacePtr surface = NULL;
+    int rc;
     CARD8 mode = X12SurfaceCompleteModeCopy;
 
-    if (!pp || !pp->surface || !pp->window)
+    if (!pp)
         return;
 
-    X12SurfaceCopyToWindow(pp->surface, pp->window, pp->x_off, pp->y_off);
+    if (!X12SurfaceClientAlive(pp->client))
+        return;
+
+    rc = dixLookupWindow(&window, pp->window, pp->client, DixWriteAccess);
+    if (rc != Success)
+        return;
+
+    surface = X12SurfaceLookup(pp->client, pp->surface, &rc);
+    if (!surface)
+        return;
+
+    X12SurfaceCopyToWindow(surface, window, pp->x_off, pp->y_off);
     X12SurfaceSignalSyncobj(pp->client, pp->release_syncobj, pp->release_point);
-    X12SurfaceSendComplete(pp->window, pp->surface->id, pp->serial, mode, ust,
-                           msc);
-    X12SurfaceSendIdle(pp->window, pp->surface->id, pp->serial);
+    X12SurfaceSendComplete(pp->window, pp->surface, pp->serial, mode, ust, msc);
+    X12SurfaceSendIdle(pp->window, pp->surface, pp->serial);
+}
+
+static int
+X12SurfaceComparePending(const X12PendingPresentPtr a,
+                         const X12PendingPresentPtr b)
+{
+    WindowPtr wa = NullWindow, wb = NullWindow;
+    int rc;
+
+    if (!a || !b)
+        return 0;
+    (void)dixLookupWindow(&wa, a->window, serverClient, DixGetAttrAccess);
+    (void)dixLookupWindow(&wb, b->window, serverClient, DixGetAttrAccess);
+    (void)rc;
+    return X12SurfaceCompareWindows(wa, wb);
 }
 
 static void
 X12SurfaceFlushPendingForMsc(ScreenPtr screen, uint64_t msc)
 {
-    X12PendingPresentPtr ready[32];
-    int n = 0, i, j;
+    X12PendingPresentPtr *ready = NULL;
+    int n = 0, cap = 0, i, j;
     X12PendingPresentPtr *pp, cur;
     uint64_t ust, now_msc;
+    WindowPtr window;
 
     X12SurfaceGetUstMsc(screen, &ust, &now_msc);
     if (msc < now_msc)
@@ -573,7 +635,17 @@ X12SurfaceFlushPendingForMsc(ScreenPtr screen, uint64_t msc)
 
     for (pp = &x12PendingPresents; *pp;) {
         cur = *pp;
-        if (cur->window->drawable.pScreen != screen || cur->target_msc > msc) {
+        window = NullWindow;
+        if (dixLookupWindow(&window, cur->window, serverClient,
+                            DixGetAttrAccess) != Success) {
+            /* Window gone — drop the queued present. */
+            *pp = cur->next;
+            if (cur->timer)
+                TimerFree(cur->timer);
+            free(cur);
+            continue;
+        }
+        if (window->drawable.pScreen != screen || cur->target_msc > msc) {
             pp = &(*pp)->next;
             continue;
         }
@@ -582,18 +654,24 @@ X12SurfaceFlushPendingForMsc(ScreenPtr screen, uint64_t msc)
             TimerFree(cur->timer);
             cur->timer = NULL;
         }
-        if (n < 32)
-            ready[n++] = cur;
-        else {
-            X12SurfaceExecutePresent(cur, ust, msc);
-            free(cur);
+        if (n == cap) {
+            int ncap = cap ? cap * 2 : 8;
+            X12PendingPresentPtr *tmp =
+                realloc(ready, (size_t)ncap * sizeof(*ready));
+            if (!tmp) {
+                X12SurfaceExecutePresent(cur, ust, msc);
+                free(cur);
+                continue;
+            }
+            ready = tmp;
+            cap = ncap;
         }
+        ready[n++] = cur;
     }
 
-    /* Stacking order: bottom to top so higher windows win the last CopyArea. */
     for (i = 0; i < n; i++) {
         for (j = i + 1; j < n; j++) {
-            if (X12SurfaceComparePending(ready[i], ready[j]) < 0) {
+            if (X12SurfaceComparePending(ready[i], ready[j]) > 0) {
                 X12PendingPresentPtr tmp = ready[i];
                 ready[i] = ready[j];
                 ready[j] = tmp;
@@ -604,21 +682,32 @@ X12SurfaceFlushPendingForMsc(ScreenPtr screen, uint64_t msc)
         X12SurfaceExecutePresent(ready[i], ust, msc);
         free(ready[i]);
     }
+    free(ready);
 }
 
 static CARD32
 X12SurfacePendingTimer(OsTimerPtr timer, CARD32 time, void *arg)
 {
     X12PendingPresentPtr pp = arg;
+    WindowPtr window = NullWindow;
     ScreenPtr screen;
+    XID wid;
+    uint64_t target;
 
     (void)timer;
     (void)time;
-    if (!pp || !pp->window)
+    if (!pp)
         return 0;
-    screen = pp->window->drawable.pScreen;
+    wid = pp->window;
+    target = pp->target_msc;
     pp->timer = NULL;
-    X12SurfaceFlushPendingForMsc(screen, pp->target_msc);
+    if (dixLookupWindow(&window, wid, serverClient, DixGetAttrAccess) !=
+        Success) {
+        X12SurfaceAbortPending(X12PendingMatchWindow, &wid);
+        return 0;
+    }
+    screen = window->drawable.pScreen;
+    X12SurfaceFlushPendingForMsc(screen, target);
     return 0;
 }
 
@@ -631,7 +720,7 @@ X12SurfaceQueuePresent(ClientPtr client,
 {
     X12PendingPresentPtr pp;
     uint64_t ust, now_msc;
-    INT32 delay_ms;
+    uint64_t delay_ms;
 
     X12SurfaceGetUstMsc(window->drawable.pScreen, &ust, &now_msc);
 
@@ -639,8 +728,8 @@ X12SurfaceQueuePresent(ClientPtr client,
     if (!pp)
         return BadAlloc;
     pp->client = client;
-    pp->window = window;
-    pp->surface = surface;
+    pp->window = window->drawable.id;
+    pp->surface = surface->id;
     pp->serial = p->serial;
     pp->x_off = p->x_off;
     pp->y_off = p->y_off;
@@ -655,9 +744,11 @@ X12SurfaceQueuePresent(ClientPtr client,
         return Success;
     }
 
-    delay_ms = (INT32)((target_msc - now_msc) * X12_SURFACE_FAKE_INTERVAL_US / 1000);
+    delay_ms = (target_msc - now_msc) * X12_SURFACE_FAKE_INTERVAL_US / 1000ull;
     if (delay_ms < 1)
         delay_ms = 1;
+    if (delay_ms > X12_SURFACE_MAX_DELAY_MS)
+        delay_ms = X12_SURFACE_MAX_DELAY_MS;
     pp->timer = TimerSet(NULL, 0, (CARD32)delay_ms, X12SurfacePendingTimer, pp);
     if (!pp->timer) {
         /* Fall back to immediate compose. */
@@ -771,21 +862,25 @@ ProcX12SurfaceCreateSurface(ClientPtr client,
     int i;
 
     rc = dixLookupDrawable(&draw, cs->drawable, client, 0, DixGetAttrAccess);
-    if (rc != Success)
+    if (rc != Success) {
+        X12SurfaceDrainFds(client);
         return rc;
+    }
 
-    if (cs->num_buffers < 1 || cs->num_buffers > 4)
-        return BadValue;
-    if (cs->modifier != X12_MOD_LINEAR && cs->modifier != X12_MOD_INVALID)
+    if (cs->num_buffers < 1 || cs->num_buffers > 4 ||
+        (cs->modifier != X12_MOD_LINEAR && cs->modifier != X12_MOD_INVALID) ||
+        (cs->format != X12_FOURCC_XR24 && cs->format != X12_FOURCC_AR24) ||
+        cs->bpp != 32 || (cs->depth != 24 && cs->depth != 32) ||
+        cs->strides[0] < (uint32_t)cs->width * 4) {
+        X12SurfaceDrainFds(client);
         return BadMatch;
-    if (cs->format != X12_FOURCC_XR24 && cs->format != X12_FOURCC_AR24)
-        return BadMatch;
-    if (cs->bpp != 32 || (cs->depth != 24 && cs->depth != 32))
-        return BadMatch;
-    if (cs->strides[0] < (uint32_t)cs->width * 4)
-        return BadValue;
+    }
 
-    LEGAL_NEW_RESOURCE(cs->surface, client);
+    if (!LegalNewID(cs->surface, client)) {
+        client->errorValue = cs->surface;
+        X12SurfaceDrainFds(client);
+        return BadIDChoice;
+    }
 
     for (i = 0; i < cs->num_buffers; i++) {
         fds[i] = ReadFdFromClient(client);
@@ -873,7 +968,7 @@ ProcX12SurfaceCreateSurface(ClientPtr client,
     s->format = cs->format;
     s->modifier = cs->modifier;
     s->stride = cs->strides[0];
-    s->attached = NullWindow;
+    s->attached_window = 0;
     s->next = x12Surfaces;
     x12Surfaces = s;
 
@@ -917,7 +1012,11 @@ ProcX12SurfaceImportSyncobj(ClientPtr client,
     }
     (void)draw;
 
-    LEGAL_NEW_RESOURCE(is->syncobj, client);
+    if (!LegalNewID(is->syncobj, client)) {
+        client->errorValue = is->syncobj;
+        X12SurfaceDrainFds(client);
+        return BadIDChoice;
+    }
 
     fd = ReadFdFromClient(client);
     if (fd < 0)
@@ -972,7 +1071,7 @@ ProcX12SurfaceAttach(ClientPtr client, const x12_proto_surface_decoded_t *decode
     if (!s)
         return rc == BadValue ? x12SurfaceErrorBase + X12SurfaceBadSurface : rc;
 
-    s->attached = window;
+    s->attached_window = window->drawable.id;
     return Success;
 }
 
@@ -982,16 +1081,19 @@ ProcX12SurfaceDetach(ClientPtr client, const x12_proto_surface_decoded_t *decode
     WindowPtr window;
     X12SurfacePtr s;
     int rc;
+    XID wid;
 
     rc = dixLookupWindow(&window, decoded->u.detach.window, client,
                          DixSetAttrAccess);
     if (rc != Success)
         return rc;
 
+    wid = window->drawable.id;
     for (s = x12Surfaces; s; s = s->next) {
-        if (s->client == client && s->attached == window)
-            s->attached = NullWindow;
+        if (s->client == client && s->attached_window == wid)
+            s->attached_window = 0;
     }
+    X12SurfaceAbortPending(X12PendingMatchWindow, &wid);
     return Success;
 }
 
@@ -1011,9 +1113,9 @@ ProcX12SurfacePresent(ClientPtr client, const x12_proto_surface_decoded_t *decod
     if (!s)
         return rc == BadValue ? x12SurfaceErrorBase + X12SurfaceBadSurface : rc;
 
-    if (!s->attached)
-        s->attached = window;
-    if (s->attached != window)
+    if (!s->attached_window)
+        s->attached_window = window->drawable.id;
+    if (s->attached_window != window->drawable.id)
         return BadMatch;
 
     if (p->options &
@@ -1058,7 +1160,7 @@ ProcX12SurfaceSelectInput(ClientPtr client,
         return BadAlloc;
     ev->id = si->eid;
     ev->client = client;
-    ev->window = window;
+    ev->window = window->drawable.id;
     ev->mask = si->event_mask;
     ev->next = x12SurfaceEvents;
     x12SurfaceEvents = ev;
@@ -1129,6 +1231,27 @@ SProcX12SurfaceDispatch(ClientPtr client)
     }
 }
 
+static void
+X12SurfaceClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
+{
+    NewClientInfoRec *pci = calldata;
+
+    (void)pcbl;
+    (void)unused;
+    if (!pci || !pci->client)
+        return;
+    if (pci->client->clientState != ClientStateGone)
+        return;
+    X12SurfaceAbortPending(X12PendingMatchClient, pci->client);
+}
+
+static void
+X12SurfaceResetProc(ExtensionEntry *extEntry)
+{
+    (void)extEntry;
+    DeleteCallback(&ClientStateCallback, X12SurfaceClientState, NULL);
+}
+
 void
 X12SurfaceExtensionInit(void)
 {
@@ -1143,12 +1266,15 @@ X12SurfaceExtensionInit(void)
     if (!x12SurfaceType || !x12SurfaceEventType || !x12SyncobjType)
         FatalError("X12Surface: cannot allocate resource types\n");
 
+    if (!AddCallback(&ClientStateCallback, X12SurfaceClientState, NULL))
+        FatalError("X12Surface: cannot register client-state callback\n");
+
     extEntry = AddExtension(X12SURFACE_NAME,
                             X12SURFACENumberEvents,
                             X12SURFACENumberErrors,
                             ProcX12SurfaceDispatch,
                             SProcX12SurfaceDispatch,
-                            NULL,
+                            X12SurfaceResetProc,
                             StandardMinorOpcode);
     if (!extEntry) {
         ErrorF("X12Surface: AddExtension failed\n");
