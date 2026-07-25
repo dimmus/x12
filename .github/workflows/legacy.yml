@@ -94,6 +94,7 @@ jobs:
         run: |
           ninja -C build-asan \
             server/hw/vfb/Xvfb \
+            app/xkbcomp/xkbcomp \
             lib/src/x11/libX11.so.6.4.0 \
             lib/ext/xtst/libXtst.so.6.1.0 \
             lib/ext/xi/libXi.so.6.1.0 \
