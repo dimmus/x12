@@ -129,7 +129,7 @@ static Atom wm_delete_window;
 
 Boolean IsXLFDFontName(String fontName);
 
-typedef void (*XtProc)(XtPointer closure);
+typedef void (*XfsWorkProc)(XtPointer closure);
 
 static struct _appRes
 {
@@ -294,7 +294,7 @@ static void EnableAllItems(int field);
 static void EnableRemainingItems(ValidateAction current_field_action);
 static void FlushXqueue(Display *dpy);
 static void MarkInvalidFonts(Boolean *set, FieldValue *val);
-static void ScheduleWork(XtProc proc, XtPointer closure, int priority);
+static void ScheduleWork(XfsWorkProc proc, XtPointer closure, int priority);
 static void SetCurrentFontCount(void);
 static void SetNoFonts(void);
 static void SetParsingFontCount(int count);
@@ -479,7 +479,7 @@ main(int argc, char **argv)
                 makeRec->field  = f;
                 makeRec->button = field;
                 ScheduleWork(MakeFieldMenu, (XtPointer)makeRec, 2);
-                ScheduleWork((XtProc)XtFree, (XtPointer)makeRec, 2);
+                ScheduleWork((XfsWorkProc)XtFree, (XtPointer)makeRec, 2);
             }
         }
 
@@ -527,14 +527,14 @@ struct WorkPiece
 {
     WorkPiece next;
     int       priority;
-    XtProc    proc;
+    XfsWorkProc proc;
     XtPointer closure;
 };
 
 static WorkPiece workQueue = NULL;
 
 /*
- * ScheduleWork( XtProc proc, XtPointer closure, int priority )
+ * ScheduleWork( XfsWorkProc proc, XtPointer closure, int priority )
  *
  * Adds a WorkPiece to the workQueue in FIFO order by priority.
  * Lower numbered priority work is completed before higher numbered
@@ -545,7 +545,7 @@ static WorkPiece workQueue = NULL;
  */
 
 static void
-ScheduleWork(XtProc proc, XtPointer closure, int priority)
+ScheduleWork(XfsWorkProc proc, XtPointer closure, int priority)
 {
     WorkPiece piece = XtNew(WorkPieceRec);
 
@@ -662,7 +662,7 @@ GetFontNames(XtPointer closure)
         ParseRec *prevRec = parseRec;
         parseRec->end     = parseRec->start + PARSE_QUANTUM;
         ScheduleWork(ParseFontNames, (XtPointer)parseRec, work_priority);
-        ScheduleWork((XtProc)XtFree, (XtPointer)parseRec, work_priority);
+        ScheduleWork((XfsWorkProc)XtFree, (XtPointer)parseRec, work_priority);
         parseRec  = XtNew(ParseRec);
         *parseRec = *prevRec;
         parseRec->start += PARSE_QUANTUM;
@@ -673,8 +673,8 @@ GetFontNames(XtPointer closure)
     }
     parseRec->end = numFonts;
     ScheduleWork(ParseFontNames, (XtPointer)parseRec, work_priority);
-    ScheduleWork((XtProc)XFreeFontNames, (XtPointer)fontNames, work_priority);
-    ScheduleWork((XtProc)XtFree, (XtPointer)parseRec, work_priority);
+    ScheduleWork((XfsWorkProc)XFreeFontNames, (XtPointer)fontNames, work_priority);
+    ScheduleWork((XfsWorkProc)XtFree, (XtPointer)parseRec, work_priority);
     if (AppRes.scaled_fonts)
         ScheduleWork(FixScalables, (XtPointer)topLevel, work_priority);
     ScheduleWork(SortFields, (XtPointer)0, work_priority);

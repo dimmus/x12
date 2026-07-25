@@ -37,6 +37,11 @@ in this Software without prior written authorization from the X Consortium.
 #  define XawVersion 7000002L
 #endif
 
+/* Match build-time Athena feature set for clients that only include XawInit.h */
+#ifndef XAW_INTERNATIONALIZATION
+#  define XAW_INTERNATIONALIZATION 1
+#endif
+
 _XFUNCPROTOBEGIN
 
 extern void XawInitializeWidgetSet(void); /* called from ClassInit procs */
