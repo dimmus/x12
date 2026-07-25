@@ -10,6 +10,7 @@ xwm_src = files(
   'client.c',
   'config.c',
   'events.c',
+  'log.c',
   'menu.c',
 )
 

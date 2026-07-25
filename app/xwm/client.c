@@ -261,14 +261,23 @@ xwm_manage(XwmState *s, Window w, XWindowAttributes *wa)
     xwm_redraw_frame(s, c);
     xwm_set_focus(s, c);
     XFlush(s->dpy);
+    XWM_INFO("manage client=0x%lx frame=0x%lx \"%s\" %dx%d+%d+%d (n=%d)",
+             (unsigned long)w, (unsigned long)c->frame,
+             c->name ? c->name : "", c->cw, c->ch, c->x, c->y, s->nclients);
     return c;
 }
 
 void
 xwm_unmanage(XwmState *s, XwmClient *c)
 {
+    Window client;
+
     if (!c || !c->exists)
         return;
+    client = c->client;
+    XWM_INFO("unmanage client=0x%lx frame=0x%lx \"%s\" (n=%d)",
+             (unsigned long)client, (unsigned long)c->frame,
+             c->name ? c->name : "", s->nclients - 1);
     if (s->focus == c)
         s->focus = NULL;
     XUnmapWindow(s->dpy, c->frame);
@@ -288,6 +297,8 @@ xwm_set_focus(XwmState *s, XwmClient *c)
     XwmClient *prev = s->focus;
     if (c && c->iconic)
         return;
+    if (c == prev)
+        return;
     s->focus = c;
     if (prev && prev->exists)
         xwm_redraw_frame(s, prev);
@@ -296,6 +307,10 @@ xwm_set_focus(XwmState *s, XwmClient *c)
         XInstallColormap(s->dpy, c->cmap ? c->cmap : s->cmap);
         xwm_raise(s, c);
         xwm_redraw_frame(s, c);
+        XWM_DBG("focus client=0x%lx \"%s\"", (unsigned long)c->client,
+                c->name ? c->name : "");
+    } else {
+        XWM_DBG("focus cleared");
     }
 }
 
@@ -329,6 +344,8 @@ xwm_iconify(XwmState *s, XwmClient *c)
     xwm_set_state(s, c, IconicState);
     if (s->focus == c)
         s->focus = NULL;
+    XWM_DBG("iconify client=0x%lx \"%s\"", (unsigned long)c->client,
+            c->name ? c->name : "");
 }
 
 void
@@ -340,6 +357,8 @@ xwm_deiconify(XwmState *s, XwmClient *c)
     XUnmapWindow(s->dpy, c->icon);
     XMapWindow(s->dpy, c->frame);
     xwm_set_state(s, c, NormalState);
+    XWM_DBG("deiconify client=0x%lx \"%s\"", (unsigned long)c->client,
+            c->name ? c->name : "");
     xwm_set_focus(s, c);
 }
 
@@ -368,8 +387,12 @@ xwm_close_client(XwmState *s, XwmClient *c)
         ev.xclient.format = 32;
         ev.xclient.data.l[0] = (long)xwm_atom(s, ATOM_WM_DELETE_WINDOW);
         ev.xclient.data.l[1] = CurrentTime;
+        XWM_DBG("close via WM_DELETE_WINDOW client=0x%lx",
+                (unsigned long)c->client);
         XSendEvent(s->dpy, c->client, False, NoEventMask, &ev);
     } else {
+        XWM_DBG("close via XKillClient client=0x%lx",
+                (unsigned long)c->client);
         xwm_kill_client(s, c);
     }
 }

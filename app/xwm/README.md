@@ -19,6 +19,14 @@ Config: `~/.xwmrc` if present, else `$datadir/X11/xwm/system.xwmrc`
 (key=value: `font`, `frame`, `frame_focus`, `title_fg`, `term`,
 `random_placement`).
 
+Logging (stderr, timestamped):
+- default: INFO startup/shutdown + manage/unmanage
+- `-v` or `XWM_DEBUG=1`: focus, iconify, menu, config details
+- `-vv` or `XWM_DEBUG=2`: every X event name/window
+- `-q`: errors only
+
+Healthy startup lines include `WM selection OK` and `running on …`.
+
 Session: `$datadir/X11/xwm/x12-xinitrc` or `./scripts/x12-session.sh`.
 
 Bindings (defaults):

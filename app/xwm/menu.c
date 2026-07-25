@@ -114,6 +114,7 @@ xwm_menu_show(XwmState *s, int x, int y)
                  ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
                      LeaveWindowMask,
                  GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+    XWM_DBG("menu show at %d,%d", x, y);
 }
 
 void
@@ -157,6 +158,7 @@ xwm_menu_select(XwmState *s)
         return;
     }
     act = s->menu[s->menu_sel].action;
+    XWM_DBG("menu select \"%s\" action=%d", s->menu[s->menu_sel].label, act);
     xwm_menu_hide(s);
 
     switch (act) {

@@ -12,6 +12,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define XWM_TITLE_H       22
 #define XWM_BORDER        3
@@ -76,6 +77,13 @@ enum {
     XWM_ACT_QUIT
 };
 
+enum {
+    XWM_LOG_ERROR = 0,
+    XWM_LOG_INFO  = 1,
+    XWM_LOG_DEBUG = 2,
+    XWM_LOG_TRACE = 3
+};
+
 typedef struct XwmState {
     Display *dpy;
     int screen;
@@ -102,6 +110,17 @@ typedef struct XwmState {
     bool running;
     char *config_path;
 } XwmState;
+
+extern int xwm_log_level;
+void xwm_log_init(int level);
+void xwm_log(int level, const char *fmt, ...)
+    __attribute__((format(printf, 2, 3)));
+const char *xwm_event_name(int type);
+
+#define XWM_ERR(...)  xwm_log(XWM_LOG_ERROR, __VA_ARGS__)
+#define XWM_INFO(...) xwm_log(XWM_LOG_INFO, __VA_ARGS__)
+#define XWM_DBG(...)  xwm_log(XWM_LOG_DEBUG, __VA_ARGS__)
+#define XWM_TRC(...)  xwm_log(XWM_LOG_TRACE, __VA_ARGS__)
 
 /* atoms.c indices */
 enum {

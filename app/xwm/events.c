@@ -286,6 +286,38 @@ on_key(XwmState *s, XKeyEvent *ev)
 void
 xwm_dispatch(XwmState *s, XEvent *ev)
 {
+    if (xwm_log_level >= XWM_LOG_TRACE) {
+        Window w = 0;
+        switch (ev->type) {
+        case MapRequest:
+            w = ev->xmaprequest.window;
+            break;
+        case ConfigureRequest:
+            w = ev->xconfigurerequest.window;
+            break;
+        case UnmapNotify:
+            w = ev->xunmap.window;
+            break;
+        case DestroyNotify:
+            w = ev->xdestroywindow.window;
+            break;
+        case ButtonPress:
+        case ButtonRelease:
+            w = ev->xbutton.window;
+            break;
+        case PropertyNotify:
+            w = ev->xproperty.window;
+            break;
+        case ClientMessage:
+            w = ev->xclient.window;
+            break;
+        default:
+            break;
+        }
+        XWM_TRC("event %s window=0x%lx", xwm_event_name(ev->type),
+                (unsigned long)w);
+    }
+
     switch (ev->type) {
     case MapRequest:
         on_map_request(s, &ev->xmaprequest);
