@@ -9,7 +9,11 @@ CC="${CC:-cc}"
 
 need() { [[ -x "$1" ]] || { echo "missing $1" >&2; exit 1; }; }
 need "$XVFB"
-need "$BUILD/app/xkbcomp/xkbcomp"
+# xkbcomp: in-tree or system (ASAN CI uses -Dxkb_bin_dir=/usr/bin; ADR-0017)
+[[ -x "$BUILD/app/xkbcomp/xkbcomp" || -x /usr/bin/xkbcomp ]] || {
+  echo "missing xkbcomp (build app/xkbcomp or install x11-xkb-utils)" >&2
+  exit 1
+}
 
 BIN="$BUILD/tests/security/deny_keylog"
 mkdir -p "$BUILD/tests/security"

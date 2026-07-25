@@ -9,7 +9,10 @@ CC="${CC:-cc}"
 
 need() { [[ -x "$1" ]] || { echo "missing $1" >&2; exit 1; }; }
 need "$XVFB"
-need "$BUILD/app/xkbcomp/xkbcomp"
+[[ -x "$BUILD/app/xkbcomp/xkbcomp" || -x /usr/bin/xkbcomp ]] || {
+  echo "missing xkbcomp (build app/xkbcomp or install x11-xkb-utils)" >&2
+  exit 1
+}
 
 XCB_SO="$BUILD/lib/xcb/libxcb.so"
 [[ -e "$XCB_SO" ]] || { echo "missing $XCB_SO" >&2; exit 1; }

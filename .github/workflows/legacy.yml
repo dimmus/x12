@@ -88,13 +88,14 @@ jobs:
           CFLAGS: -fsanitize=address -fno-omit-frame-pointer -Wno-error=nonnull
           LDFLAGS: -fsanitize=address
         run: |
+          # ADR-0017: X11 toolchain is compat-only — use system xkbcomp, not
+          # ASan-instrumented in-tree xkbcomp (ODR fights with libX11).
           meson setup build-asan -Dprefix=$PWD/prefix-asan -Dbuild-debug=false \
-            -Dbuild-safe-proto=true
-      - name: Compile ASAN (Xvfb + clients needed for X12 smokes)
+            -Dbuild-safe-proto=true -Dxkb_bin_dir=/usr/bin
+      - name: Compile ASAN (Xvfb + libs for X12 smokes)
         run: |
           ninja -C build-asan \
             server/hw/vfb/Xvfb \
-            app/xkbcomp/xkbcomp \
             lib/src/x11/libX11.so.6.4.0 \
             lib/ext/xtst/libXtst.so.6.1.0 \
             lib/ext/xi/libXi.so.6.1.0 \
@@ -106,10 +107,7 @@ jobs:
       - name: X12 smokes under ASAN
         env:
           X12_BUILD_DIR: ${{ github.workspace }}/build-asan
-          # Xvfb + in-tree libs are ASan-built; link smoke clients the same way.
-          # Do not LD_PRELOAD globally — it breaks Xvfb/xkbcomp startup.
-          # detect_odr_violation=0: xkbcomp + libX11 both define XKB atom hooks
-          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1:detect_odr_violation=0
+          ASAN_OPTIONS: detect_leaks=0:halt_on_error=1
           CC: gcc
           CFLAGS: -fsanitize=address -fno-omit-frame-pointer
           LDFLAGS: -fsanitize=address
