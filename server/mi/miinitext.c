@@ -118,6 +118,9 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef XCSECURITY
     {SecurityExtensionInit, "SECURITY", &noSecurityExtension},
 #endif
+#ifdef XACE
+    {X12LevelExtensionInit, "X12-LEVEL", NULL},
+#endif
 #ifdef XINERAMA
     {PanoramiXExtensionInit, "XINERAMA", &noPanoramiXExtension},
 #endif /* XINERAMA */

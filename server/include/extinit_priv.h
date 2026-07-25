@@ -42,6 +42,7 @@ void ShmExtensionInit(void);
 void SyncExtensionInit(void);
 void XCMiscExtensionInit(void);
 void SecurityExtensionInit(void);
+void X12LevelExtensionInit(void);
 void XFree86BigfontExtensionInit(void);
 void BigReqExtensionInit(void);
 void XFixesExtensionInit(void);

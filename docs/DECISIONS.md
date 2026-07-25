@@ -23,6 +23,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0006](adr/0006-protocol-and-implementation.md) | XML/XCB IDL + hybrid C/safe front-end | **Accepted** | 2026-07-25 | Bindings: C/XCB first; MIT/X11 license |
 | [ADR-0007](adr/0007-milestone-governance-scope.md) | G1 milestone, owner, deferred remoting | **Accepted** | 2026-07-25 | Owner: Dimmus; E* skipped |
 | [ADR-0008](adr/0008-x11r8-baseline-import.md) | Vendor-copy X11R8 baseline | **Accepted** | 2026-07-25 | SHA `9b6e8f9`; ROADMAP step 1 |
+| [ADR-0009](adr/0009-meson-options-and-x12level.md) | meson.options + X12-LEVEL | **Accepted** | 2026-07-25 | Meson ≥1.1; deny-keylog G1 |
 
 ---
 
@@ -66,3 +67,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Initial request | ADR-0001, ADR-0004; strategy draft |
 | 2026-07-25 | Answers in `QUESTIONS.md` | Promoted ADR-0002/0003/0005; added ADR-0006/0007; locked D-ACC-3…15 |
 | 2026-07-25 | Implementation start | ADR-0008; X11R8 tree imported; legacy suite + CI green |
+| 2026-07-25 | Meson + levels | ADR-0009; `meson.options`; X12-LEVEL; deny_keylog test |

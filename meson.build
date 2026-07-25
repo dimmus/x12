@@ -2,7 +2,7 @@
 project('x12', 'c',
     license: 'MIT',
     version: '12.0.0-dev',
-    meson_version: '>=0.59.0',
+    meson_version: '>=1.1.0',
     default_options : [
       'buildtype=debugoptimized', # plain,debug,debugoptimized,release,minsize,custom
       'c_std=gnu99', # we use typeof in server
@@ -18,11 +18,7 @@ project('x12', 'c',
       'sysconfdir=/etc',
       'localstatedir=/var'
     ],
-    # meson_version required above; historical notes:
-    # 0.56.0
-    # 0.58.0: {'format strings'}
-    # 0.59.0: {'feed arg in custom_target'}
-    # 0.62.0: {'dep 'dl' custom lookup'}
+    # meson.options requires Meson >= 1.1.0
 )
 
 cc = meson.get_compiler('c')

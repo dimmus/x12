@@ -17,6 +17,8 @@ If `pkg-config --exists bzip2` fails, add a `bzip2.pc` (see `util/install_deps.s
 
 ## Configure & build
 
+Options live in **`meson.options`** (Meson ≥ 1.1; formerly `meson_options.txt`).
+
 ```sh
 meson setup build -Dprefix=$PWD/prefix
 meson compile -C build
@@ -38,7 +40,16 @@ Important defaults for uninstalled/CI runs:
 ./tests/legacy/run.sh
 ```
 
-Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.
+Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`. Also runs `tests/security/run_deny_keylog.sh`.
+
+## Hierarchical levels (XACE)
+
+| Flag | Meaning |
+|---|---|
+| `-client-level sandbox\|user\|full` | Default level for new clients (ADR-0003 default: **full**) |
+| `-sandbox-clients 2,3` | Force sandbox for those client indices (G1 testing) |
+
+Sandbox cannot `QueryKeymap` / keyboard grab, and cannot receive events on foreign windows.
 
 ## Known workaround
 
