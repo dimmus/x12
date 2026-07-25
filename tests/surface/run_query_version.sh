@@ -18,7 +18,7 @@ XCB_SO="$BUILD/lib/xcb/libxcb.so"
 
 INC=(-I"$ROOT/include" -I"$BUILD")
 # Link the build-tree libxcb by path so an installed prefix lib cannot win.
-"$CC" -O2 -g "$ROOT/tests/surface/query_version.c" -o "$BIN" "${INC[@]}" \
+"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/surface/query_version.c" -o "$BIN" "${INC[@]}" \
   "$XCB_SO" -Wl,-rpath,"$BUILD/lib/xcb"
 
 DISP_NUM=92

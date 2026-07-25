@@ -17,7 +17,7 @@ BIN="$BUILD/tests/surface/vk_present"
 mkdir -p "$BUILD/tests/surface"
 
 INC=(-I"$ROOT/include" -I"$BUILD")
-"$CC" -O2 -g "$ROOT/tests/surface/vk_present.c" -o "$BIN" "${INC[@]}" \
+"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/surface/vk_present.c" -o "$BIN" "${INC[@]}" \
   "$XCB_SO" -lvulkan -Wl,-rpath,"$BUILD/lib/xcb"
 
 DISP_NUM=93

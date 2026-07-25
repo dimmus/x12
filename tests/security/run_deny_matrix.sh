@@ -25,7 +25,7 @@ LIBS=(
   -Wl,-rpath,"$BUILD/lib/src/x11:$BUILD/lib/ext/xtst:$BUILD/lib/ext/xi:$BUILD/lib/xcb:$BUILD/lib/src/xau:$BUILD/lib/src/xdmcp:$BUILD/lib/ext/xext"
 )
 
-"$CC" -O2 -g "$ROOT/tests/security/deny_matrix.c" -o "$BIN" "${INC[@]}" "${LIBS[@]}"
+"$CC" -O2 -g ${CFLAGS:-} ${LDFLAGS:-} "$ROOT/tests/security/deny_matrix.c" -o "$BIN" "${INC[@]}" "${LIBS[@]}"
 
 DISP_NUM=92
 "$XVFB" ":$DISP_NUM" -ac -screen 0 800x600x24 \
