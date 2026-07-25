@@ -147,6 +147,7 @@ pub fn decode(
     match op {
         SurfaceOpcode::QueryVersion => {
             expect_len(body, 8)?;
+            expect_no_fds(fds_attached)?;
             Ok(DecodedSurfaceRequest::QueryVersion {
                 major_version: read_u32(body, 0)?,
                 minor_version: read_u32(body, 4)?,
@@ -154,12 +155,14 @@ pub fn decode(
         }
         SurfaceOpcode::QueryCapabilities => {
             expect_len(body, 4)?;
+            expect_no_fds(fds_attached)?;
             Ok(DecodedSurfaceRequest::QueryCapabilities {
                 drawable: read_u32(body, 0)?,
             })
         }
         SurfaceOpcode::QueryModifiers => {
             expect_len(body, 8)?;
+            expect_no_fds(fds_attached)?;
             Ok(DecodedSurfaceRequest::QueryModifiers {
                 drawable: read_u32(body, 0)?,
                 format: read_u32(body, 4)?,
@@ -168,6 +171,7 @@ pub fn decode(
         SurfaceOpcode::CreateSurface => decode_create_surface(body, fds_attached),
         SurfaceOpcode::DestroySurface => {
             expect_len(body, 4)?;
+            expect_no_fds(fds_attached)?;
             Ok(DecodedSurfaceRequest::DestroySurface {
                 surface: read_u32(body, 0)?,
             })

@@ -54,6 +54,10 @@
 #define SERVER_DRI3_MAJOR_VERSION               1
 #define SERVER_DRI3_MINOR_VERSION               4
 
+/* X12-SURFACE */
+#define SERVER_X12SURFACE_MAJOR_VERSION         1
+#define SERVER_X12SURFACE_MINOR_VERSION         0
+
 /* Generic event extension */
 #define SERVER_GE_MAJOR_VERSION                 1
 #define SERVER_GE_MINOR_VERSION                 0

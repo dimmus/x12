@@ -18,6 +18,7 @@ headers = files(
     'dri2proto.h',
     'dri2tokens.h',
     'dri3proto.h',
+    'x12surfaceproto.h',
     'EVI.h',
     'EVIproto.h',
     'ge.h',

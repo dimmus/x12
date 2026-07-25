@@ -198,12 +198,12 @@ subdir('lib' / 'src' / 'xtrans') # <- lib/src/xshmfence
 subdir('font') # <- lib/src/xtrans
 subdir('lib')
 subdir('font' / 'client')
+subdir('safe') # Rust front-end before server (X12-SURFACE links it)
 subdir('server')
 subdir('driver')
 subdir('app')
 subdir('demo')
 subdir('data')
-subdir('safe')
 
 f_unique = []
 foreach f: f_check

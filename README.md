@@ -20,7 +20,7 @@ meson compile -C build
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Progress: baseline + legacy gate + X12-LEVEL + X12-SURFACE IDL + **Rust protocol front-end** spike. Remaining: compositor + Vulkan client (G1).
+Progress: baseline + X12-LEVEL + X12-SURFACE IDL/stub + Rust decode linked into Xvfb. Remaining: compositor + Vulkan client (G1).
 
 Build uses **`meson.options`** (Meson ≥ 1.1).
 

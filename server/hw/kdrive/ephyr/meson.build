@@ -7,7 +7,7 @@ srcs = files(
 )
 
 dep_xephyr = [
-    dep_common,
+    dep_server_exe,
     libxcb,
     libxcb_renderutil,
     libxcb_image,
@@ -28,6 +28,11 @@ if build_xv
     srcs += 'ephyrvideo.c'
 endif
 
+xephyr_link_depends = []
+if build_x12_surface
+    xephyr_link_depends += x12_proto_a
+endif
+
 xephyr_server = executable('Xephyr',
     srcs,
     include_directories: [
@@ -35,6 +40,7 @@ xephyr_server = executable('Xephyr',
         include_directories('../src')
     ],
     dependencies: dep_xephyr,
+    link_depends: xephyr_link_depends,
     link_with: [
         libxserver_main,
         libxserver_exa,

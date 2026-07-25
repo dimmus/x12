@@ -19,13 +19,19 @@ srcs = files(
     '../../mi/miinitext.h',
 )
 
+xnest_link_depends = []
+if build_x12_surface
+    xnest_link_depends += x12_proto_a
+endif
+
 executable('Xnest',
     srcs,
     include_directories: inc_server,
     dependencies: [
-        dep_common,
+        dep_server_exe,
         libxext, libx11, libxau,
     ],
+    link_depends: xnest_link_depends,
     link_with: [
         libxserver_main,
         libxserver,

@@ -39,6 +39,12 @@ if build_xace
     srcs_xext += ['xace.c', 'x12level.c']
 endif
 
+x12_surface_incs = []
+if build_x12_surface
+    srcs_xext += 'x12surface.c'
+    x12_surface_incs += include_directories('../../safe/x12-proto/include')
+endif
+
 if build_xsecurity
     srcs_xext += 'security.c'
 endif
@@ -63,7 +69,7 @@ endif
 
 libxserver_xext = static_library('libxserver_xext',
     srcs_xext,
-    include_directories: inc_server,
+    include_directories: inc_server + x12_surface_incs,
     dependencies: dep_common,
     c_args: XSERVER_CFLAGS,
     link_args: XSERVER_LDFLAGS,

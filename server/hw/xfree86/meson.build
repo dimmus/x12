@@ -87,6 +87,9 @@ dep_xorg = [
     libxfont,
     libxcvt,
 ]
+if build_x12_surface
+    dep_xorg += dep_x12_proto
+endif
 
 if get_option('suid_wrapper')
     xorg_install_dir = get_option('libexecdir')
@@ -94,11 +97,17 @@ else
     xorg_install_dir = get_option('bindir')
 endif
 
+xorg_link_depends = []
+if build_x12_surface
+    xorg_link_depends += x12_proto_a
+endif
+
 exe_xorg = executable(
     'Xorg',
     srcs_xorg,
     include_directories: inc_server,
     dependencies: dep_xorg,
+    link_depends: xorg_link_depends,
     link_whole: xorg_link,
     link_args: linker_export_flags,
     c_args: XFREE86_CFLAGS,

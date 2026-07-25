@@ -313,6 +313,12 @@ dep_common = [
     dep_libbsd,
 ]
 
+# Rust front-end is linked only into final server executables (not static libs).
+dep_server_exe = dep_common
+if build_x12_surface
+    dep_server_exe += dep_x12_proto
+endif
+
 inc_server = [
     inc_lib,
     inc_font,
