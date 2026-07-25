@@ -42,6 +42,7 @@ E. HDR/ICC (v2)
 F. Remoting — only if a new ADR reopens E*
 G. [DONE] XML wire + fixed-request decode codegen + fuzz/ASAN (ADR-0016/0018)
 H. [DONE] Policy: X11 = compat/test only; invest in native X12 path (ADR-0017)
+I. [DONE] Reference WM: xwm (from-scratch ICCCM engine) + session smoke (ADR-0019)
 ```
 
 ## Explicitly after G1 (detail)
@@ -49,6 +50,7 @@ H. [DONE] Policy: X11 = compat/test only; invest in native X12 path (ADR-0017)
 - DRM syncobj ioctl path when DDX provides import_syncobj
 - Broader KMS desktop bring-up (Intel/AMD + proprietary NVIDIA atomic flips)
 - Non-unity per-monitor scale policy once toolkits OptIn
+- EWMH / richer WM features (only if a new ADR expands ADR-0019)
 - HDR/ICC (v2)
 - Remoting (only if new ADR reopens E*)
 - Present/CreateSurface hand decode → generated (validators remain)

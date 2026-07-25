@@ -1,0 +1,11 @@
+#
+# X12 reference window manager (xwm) — key=value defaults.
+# Override with ~/.xwmrc or `xwm -f path`.
+#
+
+font=fixed
+frame=1a2a3a
+frame_focus=2a5a8a
+title_fg=e6e6e6
+term=xterm
+random_placement=true
