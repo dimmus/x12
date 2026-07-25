@@ -8,4 +8,9 @@ subdir('nouveau')
 subdir('qxl')       # TODO: implement spice
 # subdir('vbox')    # TODO: need "VboxVideo.h" (need dep_vbox?)
 subdir('vesa')
-subdir('vmware')
+# Needs Mesa xatracker (Gallium XA). Absent on Mesa ≥25.2 / current Arch.
+if dep_xa.found()
+  subdir('vmware')
+else
+  message('skipping video/vmware: xatracker (libxatracker) not found')
+endif

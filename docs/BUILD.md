@@ -15,6 +15,20 @@ sudo apt-get install -y \
 
 If `pkg-config --exists bzip2` fails, add a `bzip2.pc` (see `util/install_deps.sh`).
 
+## Dependencies (Arch Linux)
+
+```sh
+sudo pacman -S --needed base-devel meson ninja pkgconf zlib bzip2 freetype2 \
+  fontconfig mesa libglvnd libepoxy libdrm libinput libpciaccess pixman \
+  libunwind libjpeg-turbo openssl ncurses cairo libbsd systemd dbus \
+  libpng xkeyboard-config xorg-xkbcomp xorg-fonts-misc flex bison cmake \
+  gettext python
+```
+
+**`xatracker` / `libxatracker`:** Mesa dropped Gallium-XA (removed in Mesa 25.2; Arch `mesa` 26.x does not ship `xatracker.pc`). X12 treats it as optional and skips the VMware video driver when missing. Xvfb/Xephyr/native X12 work without it. There is nothing useful to install from official repos for this dep.
+
+Check: `pkg-config --exists xatracker || echo 'xatracker absent (OK)'`
+
 ## Configure & build
 
 Options live in **`meson.options`** (Meson ≥ 1.1; formerly `meson_options.txt`).
