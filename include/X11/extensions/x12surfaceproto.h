@@ -37,6 +37,10 @@
 #define X12SurfaceCapabilityMultiplane 2
 #define X12SurfaceCapabilityModifiers 4
 
+#define X12SurfacePresentOptionAsync 1
+#define X12SurfacePresentOptionCopy 2
+#define X12SurfacePresentOptionTearFree 4
+
 #define X12SurfaceCompleteModeCopy 0
 #define X12SurfaceCompleteModeFlip 1
 #define X12SurfaceCompleteModeSkip 2

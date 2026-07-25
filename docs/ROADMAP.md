@@ -34,23 +34,24 @@
 ## After G1 (next sequence)
 
 ```text
-A. [PARTIAL] DRI3 pixmap_from_fds CreateSurface + Damage Present (ADR-0016); Syncobj/MSC still open
-B. Toolkit-opt-in fractional / per-monitor scaling
-C. [DONE] Request matrix docs + XACE enforcement (docs/X12_LEVEL_MATRIX.md)
-D. [PARTIAL] Xephyr nested smoke; real KMS still open — X11 DDX not a product goal (ADR-0017)
+A. [DONE] Present syncobj + MSC queue + Damage/stacking compose (ADR-0018); CopyArea on Xvfb
+B. [DONE] X12-SCALE toolkit-opt-in stub (unity GetScale + OptIn; ADR-0018)
+C. [DONE] Request matrix docs + XACE (cursor + all-device sandbox; ADR-0018)
+D. [PARTIAL] Xephyr DRI3 screen_init + live Multiplane caps; real KMS atomic flips still open
 E. HDR/ICC (v2)
 F. Remoting — only if a new ADR reopens E*
-G. [DONE] XML wire codegen + fuzz harness + ASAN on X12 smokes (system xkbcomp; ADR-0016/0017)
+G. [DONE] XML wire + fixed-request decode codegen + fuzz/ASAN (ADR-0016/0018)
 H. [DONE] Policy: X11 = compat/test only; invest in native X12 path (ADR-0017)
 ```
 
 ## Explicitly after G1 (detail)
 
-- Toolkit-opt-in fractional / per-monitor scaling
-- Broader KMS desktop bring-up (Intel/AMD + proprietary NVIDIA)
-- Fine request-matrix documentation for sandbox/user/full
+- DRM syncobj ioctl path when DDX provides import_syncobj
+- Broader KMS desktop bring-up (Intel/AMD + proprietary NVIDIA atomic flips)
+- Non-unity per-monitor scale policy once toolkits OptIn
 - HDR/ICC (v2)
 - Remoting (only if new ADR reopens E*)
+- Present/CreateSurface hand decode → generated (validators remain)
 
 ## Non-goals that must not sneak into G1
 

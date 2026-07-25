@@ -30,6 +30,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/mman.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 #include <pixman.h>
@@ -39,6 +40,9 @@
 #include "ephyr.h"
 #include "ephyr_glamor.h"
 #include "os.h"
+#ifdef DRI3
+#include "dri3.h"
+#endif
 
 /* until we need geometry shaders GL3.1 should suffice. */
 /* Xephyr has its own copy of this for build reasons */
@@ -92,6 +96,86 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
     }
 }
 
+#ifdef DRI3
+/*
+ * Nested Xephyr: register DRI3 with LINEAR mmap import so X12-SURFACE can
+ * exercise pixmap_from_fds outside Xvfb. glamor_egl's GBM helpers are not
+ * linked into this kdrive binary; real KMS/GBM scanout stays a DRM DDX
+ * concern (ADR-0018).
+ */
+static PixmapPtr
+ephyr_pixmap_from_fds(ScreenPtr screen,
+                      CARD8 num_fds,
+                      const int *fds,
+                      CARD16 width,
+                      CARD16 height,
+                      const CARD32 *strides,
+                      const CARD32 *offsets,
+                      CARD8 depth,
+                      CARD8 bpp,
+                      CARD64 modifier)
+{
+    PixmapPtr pixmap;
+    void *map;
+    size_t map_size;
+    uint64_t linear = 0;
+
+    if (num_fds < 1 || !fds || !strides || !offsets)
+        return NULL;
+    if (modifier != linear && modifier != (uint64_t)~0ull)
+        return NULL;
+    if (bpp != 32 || strides[0] < (CARD32)width * 4)
+        return NULL;
+
+    map_size = (size_t)offsets[0] + (size_t)strides[0] * (size_t)height;
+    if (map_size == 0 || map_size > (size_t)512 * 1024 * 1024)
+        return NULL;
+    map = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fds[0], 0);
+    if (map == MAP_FAILED)
+        return NULL;
+
+    pixmap = (*screen->CreatePixmap)(screen, 0, 0, depth, 0);
+    if (!pixmap) {
+        munmap(map, map_size);
+        return NULL;
+    }
+    if (!(*screen->ModifyPixmapHeader)(pixmap, width, height, depth, bpp,
+                                       (int)strides[0],
+                                       (char *)map + offsets[0])) {
+        (*screen->DestroyPixmap)(pixmap);
+        munmap(map, map_size);
+        return NULL;
+    }
+    /* Leak map until pixmap destroy — acceptable for nest smoke; GBM path
+     * will own BO lifetime when linked. */
+    (void)map;
+    return pixmap;
+}
+
+static PixmapPtr
+ephyr_pixmap_from_fd(ScreenPtr screen,
+                     int fd,
+                     CARD16 width,
+                     CARD16 height,
+                     CARD16 stride,
+                     CARD8 depth,
+                     CARD8 bpp)
+{
+    CARD32 strides[1] = { stride };
+    CARD32 offsets[1] = { 0 };
+    return ephyr_pixmap_from_fds(screen, 1, &fd, width, height, strides,
+                                 offsets, depth, bpp, 0);
+}
+
+static const dri3_screen_info_rec ephyr_dri3_info = {
+    .version = 2,
+    .pixmap_from_fds = ephyr_pixmap_from_fds,
+    .pixmap_from_fd = ephyr_pixmap_from_fd,
+    .fds_from_pixmap = glamor_egl_fds_from_pixmap,
+    .fd_from_pixmap = glamor_egl_fd_from_pixmap,
+};
+#endif
+
 void
 glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 {
@@ -101,6 +185,10 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     struct ephyr_glamor *ephyr_glamor = scrpriv->glamor;
 
     glamor_enable_dri3(screen);
+#ifdef DRI3
+    if (!dri3_screen_init(screen, &ephyr_dri3_info))
+        ErrorF("Xephyr: DRI3 screen init failed (X12-SURFACE stays mmap)\n");
+#endif
     glamor_ctx->display = ephyr_glamor->dpy;
     glamor_ctx->ctx = ephyr_glamor->ctx;
     glamor_ctx->surface = ephyr_glamor->egl_win;

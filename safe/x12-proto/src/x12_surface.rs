@@ -1,6 +1,9 @@
 //! Decode/validate X12-SURFACE requests (`proto/xcb/src/x12_surface.xml`).
+//! Fixed-size requests: `generated_decode` (from XML via gen_wire.py).
+//! CreateSurface / Present keep hand validators (planes, pads, options).
 
 use crate::frame::{expect_len, read_u16, read_u32, read_u64, DecodeError};
+use crate::generated_decode;
 
 /// Minor opcodes (must match XML).
 #[repr(u8)]
@@ -146,85 +149,47 @@ pub fn decode(
     let op = SurfaceOpcode::from_u8(minor)?;
     match op {
         SurfaceOpcode::QueryVersion => {
-            expect_len(body, 8)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::QueryVersion {
-                major_version: read_u32(body, 0)?,
-                minor_version: read_u32(body, 4)?,
-            })
+            generated_decode::decode_queryversion(body)
         }
         SurfaceOpcode::QueryCapabilities => {
-            expect_len(body, 4)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::QueryCapabilities {
-                drawable: read_u32(body, 0)?,
-            })
+            generated_decode::decode_querycapabilities(body)
         }
         SurfaceOpcode::QueryModifiers => {
-            expect_len(body, 8)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::QueryModifiers {
-                drawable: read_u32(body, 0)?,
-                format: read_u32(body, 4)?,
-            })
+            generated_decode::decode_querymodifiers(body)
         }
         SurfaceOpcode::CreateSurface => decode_create_surface(body, fds_attached),
         SurfaceOpcode::DestroySurface => {
-            expect_len(body, 4)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::DestroySurface {
-                surface: read_u32(body, 0)?,
-            })
+            generated_decode::decode_destroysurface(body)
         }
         SurfaceOpcode::ImportSyncobj => {
-            expect_len(body, 8)?;
             if fds_attached != 1 {
                 return Err(DecodeError::FdCountMismatch {
                     expected: 1,
                     got: fds_attached,
                 });
             }
-            Ok(DecodedSurfaceRequest::ImportSyncobj {
-                syncobj: read_u32(body, 0)?,
-                drawable: read_u32(body, 4)?,
-            })
+            generated_decode::decode_importsyncobj(body)
         }
         SurfaceOpcode::FreeSyncobj => {
-            expect_len(body, 4)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::FreeSyncobj {
-                syncobj: read_u32(body, 0)?,
-            })
+            generated_decode::decode_freesyncobj(body)
         }
         SurfaceOpcode::Attach => {
-            expect_len(body, 8)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::Attach {
-                window: read_u32(body, 0)?,
-                surface: read_u32(body, 4)?,
-            })
+            generated_decode::decode_attach(body)
         }
         SurfaceOpcode::Detach => {
-            expect_len(body, 4)?;
             expect_no_fds(fds_attached)?;
-            Ok(DecodedSurfaceRequest::Detach {
-                window: read_u32(body, 0)?,
-            })
+            generated_decode::decode_detach(body)
         }
         SurfaceOpcode::Present => decode_present(body, fds_attached),
         SurfaceOpcode::SelectInput => {
-            expect_len(body, 12)?;
             expect_no_fds(fds_attached)?;
-            let mask = read_u32(body, 8)?;
-            // EventMask bits 0..2 only in v1.0
-            if mask & !0b111 != 0 {
-                return Err(DecodeError::InvalidField("event_mask"));
-            }
-            Ok(DecodedSurfaceRequest::SelectInput {
-                eid: read_u32(body, 0)?,
-                window: read_u32(body, 4)?,
-                event_mask: mask,
-            })
+            generated_decode::decode_selectinput(body)
         }
     }
 }
