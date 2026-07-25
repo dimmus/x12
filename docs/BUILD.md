@@ -42,11 +42,19 @@ Important defaults for uninstalled/CI runs:
 
 ```sh
 ./tests/legacy/run.sh   # B2 corpus, then tests/x12/run.sh — G1 gate
-./tests/x12/run.sh      # deny_keylog + surface QueryVersion + vk_present
+./tests/x12/run.sh      # deny_keylog + deny_matrix + QueryVersion + vk_present
+./tests/safe_proto/run.sh  # codegen + cargo test + drift + fuzz
 ```
 
 Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.  
-Milestone evidence: [`docs/G1.md`](G1.md) (tag `g1`).
+Milestone evidence: [`docs/G1.md`](G1.md) (tag `g1`). Post-G1: [ADR-0016](adr/0016-best-of-best-post-g1.md).
+
+### Xephyr (non-Xvfb) smoke
+
+```sh
+meson configure build -Dxephyr=true && meson compile -C build
+./tests/x12/run_xephyr.sh
+```
 
 ## Safe protocol front-end / X12-SURFACE
 
