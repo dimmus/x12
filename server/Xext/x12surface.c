@@ -345,6 +345,9 @@ X12SurfaceScreenHasDri3Import(ScreenPtr screen)
 
     if (!screen)
         return FALSE;
+    /* Xvfb never calls dri3_screen_init — key stays uninitialized. */
+    if (!dri3_screen_private_key.initialized)
+        return FALSE;
     ds = dri3_screen_priv(screen);
     if (!ds || !ds->info)
         return FALSE;
@@ -386,7 +389,7 @@ X12SurfaceComparePending(const X12PendingPresentPtr a,
 {
     WindowPtr wa = a->window;
     WindowPtr wb = b->window;
-    WindowPtr pa, pb, sa, sb;
+    WindowPtr pa, pb, sa;
 
     if (wa == wb)
         return 0;

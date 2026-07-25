@@ -43,6 +43,7 @@ done
 
 export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
+export LD_LIBRARY_PATH="$BUILD/lib/xcb${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 if ! "$BIN"; then
   cat "$LOG" >&2 || true
   exit 1

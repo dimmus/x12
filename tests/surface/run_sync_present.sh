@@ -52,6 +52,7 @@ done
 
 export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
+export LD_LIBRARY_PATH="$BUILD/lib/xcb${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 if ! "$BIN"; then
   echo "sync_present failed; Xvfb log:" >&2
   cat "$LOG" >&2 || true

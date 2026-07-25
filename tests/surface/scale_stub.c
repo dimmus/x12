@@ -1,9 +1,10 @@
-/* X12-SCALE QueryVersion / GetScale / OptIn smoke (raw xcb; no xcb-scale yet). */
+/* X12-SCALE QueryVersion / GetScale / OptIn smoke (raw xcb via xcbext). */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb.h>
+#include <xcb/xcbext.h>
 
 #define X12SCALE_NAME "X12-SCALE"
 #define X12_SCALE_UNITY 0x10000u
@@ -26,7 +27,7 @@ main(void)
     uint8_t major;
     uint8_t buf[16];
     struct iovec vec;
-    xcb_protocol_request_t req = { .count = 1, .ext = NULL, .isvoid = 0 };
+    xcb_protocol_request_t req;
 
     c = xcb_connect(NULL, NULL);
     if (xcb_connection_has_error(c))
@@ -48,9 +49,13 @@ main(void)
                       XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, 0,
                       NULL);
 
-    /* QueryVersion */
+    memset(&req, 0, sizeof(req));
+    req.count = 1;
+    req.ext = NULL;
     req.opcode = major;
     req.isvoid = 0;
+
+    /* QueryVersion */
     memset(buf, 0, sizeof(buf));
     buf[0] = major;
     buf[1] = 0;
