@@ -29,6 +29,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0012](adr/0012-surface-stub-and-safe-link.md) | Surface stub + linked Rust decode | **Accepted** | 2026-07-25 | Pre–step 7; QueryVersion live |
 | [ADR-0013](adr/0013-xvfb-compositor-vulkan.md) | Xvfb compositor + Vulkan client | **Accepted** | 2026-07-25 | ROADMAP step 7; lavapipe/memfd |
 | [ADR-0014](adr/0014-g1-trim-legacy-surface.md) | Trim G1 defaults; split X12 smokes | **Accepted** | 2026-07-25 | Keep B2 gate; drop unused defaults |
+| [ADR-0015](adr/0015-g1-milestone-tag.md) | Tag milestone G1 | **Accepted** | 2026-07-25 | Tag `g1`; version `12.0.0-g1` |
 
 ---
 
@@ -56,6 +57,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-18 | X12-SURFACE requests decode-first via linked Rust; QueryVersion live |
 | D-ACC-19 | Xvfb Present = mmap LINEAR + CopyArea; Vulkan client via lavapipe→memfd (G1); Syncobj still BadImplementation |
 | D-ACC-20 | G1 defaults: Xvfb only (no Xnest/Xephyr); toy demos/fontsrv/intel/Xprint/XEvie off; X12 smokes in `tests/x12/` |
+| D-ACC-21 | Milestone G1 tagged `g1`; meson version `12.0.0-g1`; evidence in `docs/G1.md` |
 
 ---
 
@@ -64,7 +66,8 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | Topic | Next artifact |
 |---|---|
 | Exact hierarchical request matrix | Security extension protocol ADR |
-| KMS/GBM dmabuf import (non-Xvfb) | Post-G1 desktop bring-up |
+| KMS/GBM dmabuf import (non-Xvfb) | ROADMAP after-G1 item A |
+| G1 public tag | Done — `g1` / ADR-0015 |
 | XML→Rust codec codegen | Follow-up when hand validators grow costly |
 | Remoting | Only if Dimmus reopens E* with a new ADR |
 
@@ -83,3 +86,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Step 7 prep | ADR-0012; ABI out-struct; X12-SURFACE stub; drift + QueryVersion smoke |
 | 2026-07-25 | Compositor + Vulkan | ADR-0013; mmap Present; lavapipe vk_present demo |
 | 2026-07-25 | Trim legacy surface | ADR-0014; slim meson defaults; split X12 smokes |
+| 2026-07-25 | Tag G1 | ADR-0015; tag `g1`; `docs/G1.md` |

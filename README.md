@@ -16,13 +16,14 @@ meson compile -C build
 ./tests/legacy/run.sh          # must pass
 ```
 
-## G1 milestone
+## G1 milestone — tagged
 
 **Xvfb + xterm + capability deny keylog + one Vulkan client**
 
-Progress: G1 path complete except final tag — Xvfb compositor + lavapipe Present demo green. Defaults trimmed to Xvfb + B2 corpus (ADR-0014).
+**Status:** achieved — git tag `g1` ([docs/G1.md](docs/G1.md), ADR-0015).  
+Verify: `./tests/legacy/run.sh` (B2 + X12 smokes). Defaults: Xvfb-focused (ADR-0014).
 
-Build uses **`meson.options`** (Meson ≥ 1.1).
+Build uses **`meson.options`** (Meson ≥ 1.1). Version: `12.0.0-g1`.
 
 ## Locked strategy
 
@@ -40,7 +41,8 @@ Build uses **`meson.options`** (Meson ≥ 1.1).
 |---|---|
 | [`docs/BUILD.md`](docs/BUILD.md) | Build & run instructions |
 | [`docs/STRATEGY.md`](docs/STRATEGY.md) | Drawbacks, novel tech, pillars |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Path to G1 |
+| [`docs/G1.md`](docs/G1.md) | G1 evidence checklist |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | G1 complete + post-G1 sequence |
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | ADR index |
 | [`docs/LEGACY_TESTS.md`](docs/LEGACY_TESTS.md) | Legacy pass-through policy |
 | [`docs/QUESTIONS.md`](docs/QUESTIONS.md) | Stakeholder answers |

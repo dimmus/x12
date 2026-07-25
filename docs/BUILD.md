@@ -38,14 +38,15 @@ Important defaults for uninstalled/CI runs:
 | `xprint` / `xevie` / `build-xproto-legacy` | default **off** |
 | `build-safe-proto` | `true` (registers `meson test safe-proto` when `cargo` exists) |
 
-## Legacy gate + X12 smokes
+## Legacy gate + X12 smokes (G1 verification)
 
 ```sh
-./tests/legacy/run.sh   # B2 corpus, then tests/x12/run.sh
+./tests/legacy/run.sh   # B2 corpus, then tests/x12/run.sh — G1 gate
 ./tests/x12/run.sh      # deny_keylog + surface QueryVersion + vk_present
 ```
 
-Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.
+Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`.  
+Milestone evidence: [`docs/G1.md`](G1.md) (tag `g1`).
 
 ## Safe protocol front-end / X12-SURFACE
 
