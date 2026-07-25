@@ -42,5 +42,5 @@ jobs:
       - name: Compile
         run: meson compile -C build
 
-      - name: Legacy suite
+      - name: Legacy suite (includes deny_keylog)
         run: ./tests/legacy/run.sh

@@ -36,7 +36,7 @@ if build_screensaver
 endif
 
 if build_xace
-    srcs_xext += 'xace.c'
+    srcs_xext += ['xace.c', 'x12level.c']
 endif
 
 if build_xsecurity

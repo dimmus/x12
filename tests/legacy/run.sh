@@ -137,6 +137,13 @@ if command -v timeout >/dev/null; then
   fi
 fi
 
+# --- G1 security: sandbox deny keylog ---
+echo "legacy: security deny_keylog"
+if ! "$ROOT/tests/security/run_deny_keylog.sh"; then
+  echo "legacy: FAIL — deny_keylog" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "legacy: FAILED" >&2
   exit 1

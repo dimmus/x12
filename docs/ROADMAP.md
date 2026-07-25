@@ -9,19 +9,20 @@
 ```text
 1. [DONE] Import / vendor X11R8 baseline (meson tree, Xvfb + xterm + legacy suite)
 2. [DONE] Stand up CI: meson build + ./tests/legacy/run.sh (fail on corpus regress)
-3. Add hierarchical level assignment (auth token / CLI) + mediation hooks (XACE-style)
-4. Security test: sandbox client cannot keylog full/user client
+3. [DONE] Hierarchical level assignment (CLI) + XACE mediation (X12-LEVEL)
+4. [DONE] Security test: sandbox client cannot keylog (QueryKeymap scrubbed)
 5. XML extension sketches: dmabuf surface + sync (XCB-style)
 6. Memory-safe protocol front-end spike (language ADR) wrapping decode/validate
 7. Built-in compositor path sufficient for Xvfb + one Vulkan dmabuf client
 8. Tag G1 when demo script + legacy suite are green
 ```
 
-### Step 1 notes (2026-07-25)
+### Notes
 
 - Provenance: ADR-0008 / `docs/vendor/X11R8-README.md`
-- Legacy harness: `./tests/legacy/run.sh` (xauth + meson unit/server + x11perf + xcmstest + xterm)
-- CI: `.github/workflows/legacy.yml`
+- Meson: `meson.options` (Meson ≥ 1.1)
+- Legacy harness: `./tests/legacy/run.sh` (+ `tests/security/run_deny_keylog.sh`)
+- Levels: `-client-level`, `-sandbox-clients` (see `docs/BUILD.md`)
 - Workaround: Xvfb `-extension XFree86-Bigfont` until QueryFont/Bigfont is fixed
 
 

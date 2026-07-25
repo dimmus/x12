@@ -117,6 +117,9 @@ __stdcall unsigned long GetTickCount(void);
 #include "miinitext.h"
 #include "present.h"
 #include "dixstruct_priv.h"
+#ifdef XACE
+#include "x12level.h"
+#endif
 #include "dpmsproc.h"
 #include "extinit_priv.h"
 
@@ -278,6 +281,10 @@ UseMsg(void)
     ErrorF("-ac                    disable access control restrictions\n");
     ErrorF("-audit int             set audit trail level\n");
     ErrorF("-auth file             select authorization file\n");
+#ifdef XACE
+    ErrorF("-client-level name     X12 hierarchical level: sandbox|user|full (default: full)\n");
+    ErrorF("-sandbox-clients ids   force sandbox for client indices (comma-separated, for tests)\n");
+#endif
     ErrorF("-br                    create root window with black background\n");
     ErrorF("+bs                    enable any backing store support\n");
     ErrorF("-bs                    disable any backing store support\n");
@@ -477,6 +484,29 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
+#ifdef XACE
+        else if (strcmp(argv[i], "-client-level") == 0) {
+            if (++i < argc) {
+                int lvl = X12LevelParseName(argv[i]);
+
+                if (lvl < 0) {
+                    ErrorF("Invalid -client-level '%s' (use sandbox|user|full)\n",
+                           argv[i]);
+                    UseMsg();
+                }
+                else
+                    x12DefaultClientLevel = lvl;
+            }
+            else
+                UseMsg();
+        }
+        else if (strcmp(argv[i], "-sandbox-clients") == 0) {
+            if (++i < argc)
+                X12LevelParseSandboxClients(argv[i]);
+            else
+                UseMsg();
+        }
+#endif
         else if (strcmp(argv[i], "-byteswappedclients") == 0) {
             AllowByteSwappedClients = FALSE;
         } else if (strcmp(argv[i], "+byteswappedclients") == 0) {
