@@ -74,8 +74,9 @@ install_headers(
     'ViewportP.h',
     'Xaw3dP.h',
     'Xaw3dXft.h',
+    'Xaw3dXftP.h',
     'XawInit.h',
     'Template.h',
     'TemplateP.h',
-    subdir: 'Xaw3dXft'
+    subdir: 'X11' / 'Xaw3dxft',
 )

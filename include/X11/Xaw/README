@@ -1,0 +1,4 @@
+X12 ships a single Athena widget library: Xaw3dxft (3D + Xft/UTF-8),
+built as libXaw. Headers under X11/Xaw/*.h are compatibility shims that
+include the corresponding X11/Xaw3dxft headers. Prefer either path;
+new Xft-specific APIs live in X11/Xaw3dxft/Xaw3dXft.h.

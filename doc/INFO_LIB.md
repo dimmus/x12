@@ -76,11 +76,17 @@ the build with --enable-docs, which is the default.
 The primary development code repository can be found at:
 https://gitlab.freedesktop.org/xorg/lib/libxtrans
 
-## Xaw - X Athena Widget Set
+## Xaw - X Athena Widget Set (unified)
 
-Xaw is a widget set based on the X Toolkit Intrinsics (Xt) Library.
+X12 ships a **single** Athena library: **Xaw3dxft** built as **`libXaw`**
+(ADR-0020). It is based on Xaw3d with FreeType/Xft and UTF-8. Include either
+`<X11/Xaw/...>` (compat shims) or `<X11/Xaw3dxft/...>`.
 
-The primary development code repository can be found at: https://gitlab.freedesktop.org/xorg/lib/libXaw
+Historical forks (classic libXaw, Xaw3d, XawPlus, neXtaw, XawM) remain under
+`lib/src/` for reference but are not built.
+
+Upstream lineage: https://gitlab.freedesktop.org/xorg/lib/libXaw3d (Xaw3d)
+plus Xaw3dxft FreeType extensions.
 
 ### Examples
 
@@ -294,11 +300,10 @@ all credits for `libxcvt` go to the author (Luc Verhaegen) and
 contributors of `xf86CVTMode()` and the `cvt` utility as found in the
 [xserver](https://gitlab.freedesktop.org/xorg/xserver/) repository.
 
-## Xaw3d - X 3D Athena Widget Set.
+## Xaw3d / XawPlus / neXtaw (legacy, not built)
 
-Xaw3d is a widget set based on the X Toolkit Intrinsics (Xt) Library.
-
-The primary development code repository can be found at: https://gitlab.freedesktop.org/xorg/lib/libXaw3d
+Superseded by the unified `libXaw` (Xaw3dxft) — see ADR-0020. Sources remain
+under `lib/src/xaw3d`, `xawplus`, `nextaw`, `xaw3dm` for reference only.
 
 ## Xft - X FreeType library
 

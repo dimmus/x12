@@ -1,10 +1,18 @@
+# X12 unified Athena widget set: Xaw3dxft built as libXaw.
+# Other historical forks (classic Xaw, Xaw3d, XawPlus, neXtaw, XawM) are not built.
+
 h_check += ['wctype.h', 'wchar.h', 'widec.h']
 f_check += 'iswspace'
 
-inc_xaw3dxft = [inc_lib, include_directories('.')]
+conf.set('XAW_ARROW_SCROLLBARS', true)
+conf.set('XAW_MULTIPLANE_PIXMAPS', true)
+conf.set('XAW_INTERNATIONALIZATION', true)
+conf.set('XAW_GRAY_BLKWHT_STIPPLES', true)
 
-dep_int_xaw3dxft = [libx11, libxt, libxmu, libxext, libxft, libxpm]
-dep_ext_xaw3dxft = dep_freetype2
+inc_xaw = [inc_lib, include_directories('.')]
+
+dep_int_xaw = [libx11, xproto, libxext, libxt, libxmu, libxpm, libxft]
+dep_ext_xaw = [dep_freetype2]
 
 src = files(
   'AllWidgets.c',
@@ -47,10 +55,7 @@ src = files(
   'Xaw3dP.c',
   'Xaw3dXft.c',
   'XawInit.c',
-)
-
-# XAW_INTERNATIONALIZATION
-src += files(
+  # internationalization
   'MultiSrc.c',
   'MultiSink.c',
   'XawIm.c',
@@ -62,36 +67,35 @@ lgen = generator(
   output: '@PLAINNAME@.yy.c',
   arguments: ['-i', '-o', '@OUTPUT@', '@INPUT@']
 )
-
-lfiles = lgen.process('laylex.l')
-src += lfiles
+src += lgen.process('laylex.l')
 
 pgen = generator(
   exe_bison,
   output: ['@BASENAME@.c', '@BASENAME@.h'],
   arguments: ['@INPUT@', '--defines=@OUTPUT1@', '--output=@OUTPUT0@']
 )
+src += pgen.process('laygram.y')
 
-pfiles = pgen.process('laygram.y')
-src += pfiles
-
-lib = library('Xaw3dxft', src,
-  include_directories: inc_xaw3dxft,
-  dependencies: [dep_int_xaw3dxft, dep_ext_xaw3dxft],
+lib = library('Xaw', src,
+  include_directories: inc_xaw,
+  dependencies: [dep_int_xaw, dep_ext_xaw],
   link_with: lib_i18n,
   version: '8.5.0',
   install: true,
 )
 
-libxaw3dxft = declare_dependency(
+libxaw = declare_dependency(
   link_with: lib,
-  include_directories: inc_xaw3dxft,
+  include_directories: inc_lib,
 )
 
+# Aliases for any leftover references
+libxaw3dxft = libxaw
+
 pkg.generate(lib,
-  description: 'X 3D Athena Widgets Library (Xft support)',
-  version: ver_xaw3dxft,
-  filebase: 'xaw3dxft',
+  description: 'X Athena Widgets Library (unified Xaw3dxft / Xft)',
+  version: ver_xaw,
+  filebase: 'xaw7',
   requires: ['xproto', 'xmu', 'xt', 'xft', 'fontconfig'],
-  requires_private: ['x11', 'xext'],
+  requires_private: ['x11', 'xext', 'xpm'],
 )

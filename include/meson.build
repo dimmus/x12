@@ -6,7 +6,7 @@ ver_ice          = '1.1.1'
 ver_sm           = '1.2.4'
 ver_x11          = '1.8.10'
 ver_xau          = '1.0.11'
-ver_xaw          = '1.0.16'
+ver_xaw          = '1.6.2'   # unified libXaw = Xaw3dxft lineage (ADR-0020)
 ver_xcursor      = '1.2.3'
 ver_xcvt         = '0.1.2'
 ver_xdmcp        = '1.1.5'
