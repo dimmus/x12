@@ -63,7 +63,7 @@
 
 #define app_con Xaw_app_con /* quiet a warning from SimpleMenu.h */
 
-/* X12: unified Athena is libXaw (Xaw3dxft). */
+/* X12: unified Athena is libXaw (lib/src/xaw). */
 #include "X11/Xaw/SimpleMenu.h"
 #include "X11/Xaw/Box.h"
 #include "X11/Xaw/SmeBSB.h"

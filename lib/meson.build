@@ -13,8 +13,8 @@ subdir('src' / 'xcursor') # <- ext/xrender, ext/xfixes
 subdir('ext' / 'xext')
 subdir('src' / 'xpm')     # <- ext/xext
 subdir('src' / 'xmu')     # <- ext/xext
-# Unified Athena: Xaw3dxft sources built as libXaw (ADR-0020).
-subdir('src' / 'xaw3dxft')
+# Unified Athena: lib/src/xaw built as libXaw (ADR-0020).
+subdir('src' / 'xaw')
 subdir('ext' / 'xrandr')
 subdir('ext' / 'xdamage')
 subdir('ext' / 'xevie')

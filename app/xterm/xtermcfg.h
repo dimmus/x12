@@ -78,7 +78,7 @@
 #define HAVE_LIBXPM           1  /* CF_WITH_XPM */
 /* #undef HAVE_LIB_PCRE */  /* CF_WITH_PCRE */
 /* #undef HAVE_LIB_PCRE2 */  /* CF_WITH_PCRE2 */
-#define HAVE_LIB_XAW 1       /* X12 unified Athena (Xaw3dxft as libXaw) */
+#define HAVE_LIB_XAW 1       /* X12 unified Athena (lib/src/xaw as libXaw) */
 #define HAVE_LIB_XAW3DXFT 1  /* same library; enables Xaw3dXft UTF-8 path */
 #define HAVE_LIB_XCURSOR 1  /* AC_CHECK_LIB(Xcursor) */
 #define HAVE_MKDTEMP  /* AC_CHECK_FUNCS(mkdtemp) */

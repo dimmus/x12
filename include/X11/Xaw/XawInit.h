@@ -1,4 +1,51 @@
-/* SPDX-License-Identifier: MIT
- * Compatibility shim: X12 unified Athena is Xaw3dxft, exposed as X11/Xaw.
+/*
+Copyright (c) 1989, 1994  X Consortium
+Copyright 2003-2004 Roland Mainz <roland.mainz@nrubsig.org>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of the X Consortium shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from the X Consortium.
  */
-#include <X11/Xaw3dxft/XawInit.h>
+#ifndef _XawInit_h
+#define _XawInit_h
+
+#include <X11/Intrinsic.h>
+#include <X11/Xfuncproto.h>
+
+/* Match classic libXaw7 so clients (e.g. xclock) detect pixmap converters. */
+#ifndef XawVendor
+#  define XawVendor XVENDORNAMESHORT
+#endif
+#ifndef XawVersion
+#  define XawVersion 7000002L
+#endif
+
+/* Match build-time Athena feature set for clients that only include XawInit.h */
+#ifndef XAW_INTERNATIONALIZATION
+#  define XAW_INTERNATIONALIZATION 1
+#endif
+
+_XFUNCPROTOBEGIN
+
+extern void XawInitializeWidgetSet(void); /* called from ClassInit procs */
+
+_XFUNCPROTOEND
+
+#endif /* _XawInit_h */

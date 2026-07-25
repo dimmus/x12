@@ -78,13 +78,13 @@ https://gitlab.freedesktop.org/xorg/lib/libxtrans
 
 ## Xaw - X Athena Widget Set (unified)
 
-X12 ships a **single** Athena library: **Xaw3dxft** built as **`libXaw`**
-(ADR-0020). It is based on Xaw3d with FreeType/Xft and UTF-8. Include either
-`<X11/Xaw/...>` (compat shims) or `<X11/Xaw3dxft/...>`.
+X12 ships a **single** Athena library: **`lib/src/xaw`** built as **`libXaw`**
+(ADR-0020). It is based on Xaw3d with FreeType/Xft and UTF-8. Include
+`<X11/Xaw/...>`.
 
 Upstream lineage: https://gitlab.freedesktop.org/xorg/lib/libXaw3d (Xaw3d)
-plus Xaw3dxft FreeType extensions. Classic Xaw / Xaw3d / XawPlus / neXtaw /
-XawM / Mowitz forks were removed from the tree.
+plus historical Xaw3dxft FreeType extensions. Classic Xaw / Xaw3d / XawPlus /
+neXtaw / XawM / Mowitz forks were removed from the tree.
 
 ### Examples
 
