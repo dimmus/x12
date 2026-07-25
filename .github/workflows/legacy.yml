@@ -69,12 +69,26 @@ jobs:
             libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
             uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
             mesa-vulkan-drivers libvulkan-dev
+          if ! pkg-config --exists bzip2; then
+            sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
+          prefix=/usr
+          exec_prefix=/usr
+          libdir=/usr/lib/x86_64-linux-gnu
+          includedir=/usr/include
+          Name: bzip2
+          Description: bzip2 compression library
+          Version: 1.0.8
+          Libs: -L${libdir} -lbz2
+          Cflags: -I${includedir}
+          EOF
+          fi
       - name: Configure ASAN
+        env:
+          CFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer
+          LDFLAGS: -fsanitize=address,undefined
         run: |
           meson setup build-asan -Dprefix=$PWD/prefix-asan -Dbuild-debug=false \
-            -Dbuild-safe-proto=true \
-            -Dc_args='-fsanitize=address,undefined -fno-omit-frame-pointer' \
-            -Dc_link_args='-fsanitize=address,undefined'
+            -Dbuild-safe-proto=true
       - name: Compile ASAN
         run: meson compile -C build-asan
       - name: X12 smokes under ASAN
@@ -99,7 +113,21 @@ jobs:
             mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
             libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
             libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
-            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl \
+            mesa-vulkan-drivers libvulkan-dev
+          if ! pkg-config --exists bzip2; then
+            sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
+          prefix=/usr
+          exec_prefix=/usr
+          libdir=/usr/lib/x86_64-linux-gnu
+          includedir=/usr/include
+          Name: bzip2
+          Description: bzip2 compression library
+          Version: 1.0.8
+          Libs: -L${libdir} -lbz2
+          Cflags: -I${includedir}
+          EOF
+          fi
       - name: Configure with Xephyr
         run: |
           meson setup build-xephyr -Dprefix=$PWD/prefix-xephyr -Dbuild-debug=false \
