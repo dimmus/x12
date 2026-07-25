@@ -1,7 +1,8 @@
-# X12 Roadmap — toward G1
+# X12 Roadmap — G1 complete
 
 **Owner:** Dimmus  
-**Milestone G1:** Xvfb + xterm + capability deny keylog + one Vulkan client  
+**Milestone G1:** Xvfb + xterm + capability deny keylog + one Vulkan client — **tagged `g1`**  
+**Evidence:** [G1.md](G1.md) · [ADR-0015](adr/0015-g1-milestone-tag.md)  
 **Gate:** X11R8 legacy corpus green ([LEGACY_TESTS.md](LEGACY_TESTS.md))
 
 ## Sequence
@@ -15,7 +16,7 @@
 6. [DONE] Memory-safe protocol front-end spike (Rust / ADR-0011) for X12-SURFACE decode/validate
 6.5 [DONE] Prep for step 7: C ABI out-struct, server QueryVersion stub, level bridge, drift gate (ADR-0012)
 7. [DONE] Built-in compositor path (Xvfb mmap+CopyArea) + Vulkan lavapipe client (ADR-0013)
-8. Tag G1 when demo script + legacy suite are green
+8. [DONE] Tag G1 — demo + legacy suite green (tag `g1`, ADR-0015)
 ```
 
 ### Notes
@@ -30,8 +31,18 @@
 - Vulkan demo: `./tests/surface/run_vk_present.sh` (lavapipe + memfd → Present)
 - Workaround: Xvfb `-extension XFree86-Bigfont` until QueryFont/Bigfont is fixed
 
+## After G1 (next sequence)
 
-## Explicitly after G1
+```text
+A. KMS/GBM dmabuf import (non-Xvfb) + honest Syncobj/MSC on Present
+B. Toolkit-opt-in fractional / per-monitor scaling
+C. Fine request-matrix documentation for sandbox/user/full
+D. Broader desktop bring-up (Intel/AMD + proprietary NVIDIA)
+E. HDR/ICC (v2)
+F. Remoting — only if a new ADR reopens E*
+```
+
+## Explicitly after G1 (detail)
 
 - Toolkit-opt-in fractional / per-monitor scaling
 - Broader KMS desktop bring-up (Intel/AMD + proprietary NVIDIA)

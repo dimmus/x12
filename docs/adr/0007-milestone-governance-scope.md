@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted — 2026-07-25 (QUESTIONS A2, E*, G1–G3, H1–H5)
+Accepted — 2026-07-25 (QUESTIONS A2, E*, G1–G3, H1–H5)  
+**Achieved:** 2026-07-25 — git tag `g1` ([ADR-0015](0015-g1-milestone-tag.md), [G1.md](../G1.md))
 
 ## Context
 

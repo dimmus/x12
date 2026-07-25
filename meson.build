@@ -1,7 +1,7 @@
 # x12: baseline imported from dimmus/X11R8 (see docs/adr/0008-x11r8-baseline-import.md)
 project('x12', 'c',
     license: 'MIT',
-    version: '12.0.0-dev',
+    version: '12.0.0-g1',
     meson_version: '>=1.1.0',
     default_options : [
       'buildtype=debugoptimized', # plain,debug,debugoptimized,release,minsize,custom
