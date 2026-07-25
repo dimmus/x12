@@ -1,0 +1,18 @@
+# x12 / build
+/build/
+/build-*/
+/prefix/
+*.swp
+*~
+.cache/
+core
+*.core
+
+# from X11R8
+.cache
+.vscode
+build
+.clang*
+app/xauth/tests/out.stderr
+app/xauth/tests/out.stdout
+app/xauth/xauth

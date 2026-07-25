@@ -1,0 +1,46 @@
+name: legacy
+
+on:
+  push:
+    branches: [main, 'cursor/**']
+  pull_request:
+
+jobs:
+  build-and-legacy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            build-essential meson ninja-build pkgconf zlib1g-dev libbz2-dev bzip2 \
+            libfreetype-dev libfontconfig-dev libgbm-dev libunwind-dev libjpeg-dev \
+            flex bison libinput-dev libssl-dev libncurses-dev \
+            mesa-common-dev libgl1-mesa-dri libegl1-mesa-dev libxatracker-dev \
+            libpixman-1-dev libsystemd-dev libdbus-1-dev cmake gettext \
+            libcairo2-dev libbsd-dev libepoxy-dev libdrm-dev libpciaccess-dev \
+            uuid-dev libpng-dev xkb-data x11-xkb-utils xfonts-base openssl
+          if ! pkg-config --exists bzip2; then
+            sudo tee /usr/lib/x86_64-linux-gnu/pkgconfig/bzip2.pc >/dev/null <<'EOF'
+          prefix=/usr
+          exec_prefix=/usr
+          libdir=/usr/lib/x86_64-linux-gnu
+          includedir=/usr/include
+          Name: bzip2
+          Description: bzip2 compression library
+          Version: 1.0.8
+          Libs: -L${libdir} -lbz2
+          Cflags: -I${includedir}
+          EOF
+          fi
+
+      - name: Configure
+        run: meson setup build -Dprefix=$PWD/prefix -Dbuild-debug=false
+
+      - name: Compile
+        run: meson compile -C build
+
+      - name: Legacy suite
+        run: ./tests/legacy/run.sh
