@@ -6,29 +6,19 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD="${X12_BUILD_DIR:-$ROOT/build}"
 PREFIX="${X12_PREFIX:-$ROOT/prefix}"
 XVFB="$BUILD/server/hw/vfb/Xvfb"
-TWM="$BUILD/app/twm/twm"
+XWM="$BUILD/app/xwm/xwm"
 CC="${CC:-cc}"
 DISP_NUM="${X12_WM_DISPLAY:-89}"
 
 need() { [[ -x "$1" ]] || { echo "missing $1" >&2; exit 1; }; }
 need "$XVFB"
-need "$TWM"
+need "$XWM"
 [[ -x "$BUILD/app/xkbcomp/xkbcomp" || -x /usr/bin/xkbcomp ]] || {
   echo "missing xkbcomp" >&2
   exit 1
 }
 
-XWM_BIN="$BUILD/app/xwm/xwm"
-mkdir -p "$BUILD/app/xwm" "$BUILD/tests/x12"
-if [[ ! -f "$XWM_BIN" ]] || grep -q '@BINDIR@' "$XWM_BIN" 2>/dev/null; then
-  sed -e "s|@BINDIR@|$PREFIX/bin|g" -e "s|@DATADIR@|$PREFIX/share|g" \
-    "$ROOT/app/xwm/xwm.in" >"$XWM_BIN"
-  chmod +x "$XWM_BIN"
-fi
-
-export XWM_TWM="$TWM"
-export XWM_SYSTEM_RC="$ROOT/app/xwm/system.xwmrc"
-export X12_BUILD_DIR="$BUILD"
+mkdir -p "$BUILD/tests/x12"
 
 BIN="$BUILD/tests/x12/wm_manage"
 INC=(-I"$ROOT/include" -I"$BUILD")
@@ -84,7 +74,7 @@ export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
 export LD_LIBRARY_PATH="$BUILD/lib/src/x11:$BUILD/lib/ext/xext:$BUILD/lib/xcb:$BUILD/lib/src/xau:$BUILD/lib/src/xdmcp${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-"$XWM_BIN" >"$LOG.xwm" 2>&1 &
+"$XWM" -f "$ROOT/app/xwm/system.xwmrc" >"$LOG.xwm" 2>&1 &
 XWM_PID=$!
 sleep 0.5
 if ! kill -0 "$XWM_PID" 2>/dev/null; then

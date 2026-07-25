@@ -1,79 +1,11 @@
 #
-# X12 reference window manager (xwm) — twm-class defaults.
-# Portable misc-fixed fonts for Xvfb / minimal installs.
+# X12 reference window manager (xwm) — key=value defaults.
 # Override with ~/.xwmrc or `xwm -f path`.
 #
 
-NoGrabServer
-RestartPreviousState
-DecorateTransients
-RandomPlacement
-ClientBorderWidth
-
-TitleFont "-misc-fixed-bold-r-normal--13-120-75-75-c-70-iso8859-1"
-ResizeFont "-misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-MenuFont "-misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-IconFont "-misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-IconManagerFont "-misc-fixed-medium-r-normal--13-120-75-75-c-70-iso8859-1"
-
-Color
-{
-    BorderColor "slategrey"
-    DefaultBackground "rgb:1a/2a/3a"
-    DefaultForeground "gray90"
-    TitleBackground "rgb:1a/2a/3a"
-    TitleForeground "gray90"
-    MenuBackground "rgb:1a/2a/3a"
-    MenuForeground "gray90"
-    MenuBorderColor "slategrey"
-    MenuTitleBackground "gray70"
-    MenuTitleForeground "rgb:1a/2a/3a"
-    IconBackground "rgb:1a/2a/3a"
-    IconForeground "gray90"
-    IconBorderColor "gray85"
-    IconManagerBackground "rgb:1a/2a/3a"
-    IconManagerForeground "gray90"
-}
-
-MoveDelta 3
-Function "move-or-lower" { f.move f.deltastop f.lower }
-Function "move-or-raise" { f.move f.deltastop f.raise }
-Function "move-or-iconify" { f.move f.deltastop f.iconify }
-
-Button1 = : root : f.menu "x12ops"
-
-Button1 = m : window|icon : f.function "move-or-lower"
-Button2 = m : window|icon : f.iconify
-Button3 = m : window|icon : f.function "move-or-raise"
-
-Button1 = : title : f.function "move-or-raise"
-Button2 = : title : f.raiselower
-
-Button1 = : icon : f.function "move-or-iconify"
-Button2 = : icon : f.iconify
-
-Button1 = : iconmgr : f.iconify
-Button2 = : iconmgr : f.iconify
-
-menu "x12ops"
-{
-"X12 xwm"	f.title
-"Iconify"	f.iconify
-"Resize"	f.resize
-"Move"		f.move
-"Raise"		f.raise
-"Lower"		f.lower
-""		f.nop
-"Focus"		f.focus
-"Unfocus"	f.unfocus
-"Show Iconmgr"	f.showiconmgr
-"Hide Iconmgr"	f.hideiconmgr
-""		f.nop
-"Xterm"		f.exec "exec xterm &"
-""		f.nop
-"Kill"		f.destroy
-"Delete"	f.delete
-""		f.nop
-"Restart"	f.restart
-"Exit"		f.quit
-}
+font=fixed
+frame=1a2a3a
+frame_focus=2a5a8a
+title_fg=e6e6e6
+term=xterm
+random_placement=true

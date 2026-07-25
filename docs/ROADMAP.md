@@ -42,7 +42,7 @@ E. HDR/ICC (v2)
 F. Remoting — only if a new ADR reopens E*
 G. [DONE] XML wire + fixed-request decode codegen + fuzz/ASAN (ADR-0016/0018)
 H. [DONE] Policy: X11 = compat/test only; invest in native X12 path (ADR-0017)
-I. [DONE] Reference WM: xwm (twm-class) + session smoke (ADR-0019)
+I. [DONE] Reference WM: xwm (from-scratch ICCCM engine) + session smoke (ADR-0019)
 ```
 
 ## Explicitly after G1 (detail)

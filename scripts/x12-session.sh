@@ -9,23 +9,14 @@ PREFIX="${X12_PREFIX:-$ROOT/prefix}"
 MODE="${1:-xvfb}"
 DISP_NUM="${X12_DISPLAY_NUM:-98}"
 
-export PATH="$PREFIX/bin:$BUILD/app/xwm:$BUILD/app/twm:$BUILD/app/xterm:$BUILD/app/xclock:$PATH"
+export PATH="$PREFIX/bin:$BUILD/app/xwm:$BUILD/app/xterm:$BUILD/app/xclock:$PATH"
 export LD_LIBRARY_PATH="$BUILD/lib/src/x11:$BUILD/lib/xcb:$BUILD/lib/src/xau:$BUILD/lib/src/xdmcp:${LD_LIBRARY_PATH:-}"
-export XWM_TWM="${XWM_TWM:-$BUILD/app/twm/twm}"
-export XWM_SYSTEM_RC="${XWM_SYSTEM_RC:-$ROOT/app/xwm/system.xwmrc}"
 export X12_BUILD_DIR="$BUILD"
 
 XVFB="$BUILD/server/hw/vfb/Xvfb"
 XEPHYR="$BUILD/server/hw/kdrive/ephyr/Xephyr"
 XWM="$BUILD/app/xwm/xwm"
 XTERM="$BUILD/app/xterm/xterm"
-
-if [[ ! -x "$XWM" ]]; then
-  mkdir -p "$BUILD/app/xwm"
-  sed -e "s|@BINDIR@|$PREFIX/bin|g" -e "s|@DATADIR@|$PREFIX/share|g" \
-    "$ROOT/app/xwm/xwm.in" >"$XWM"
-  chmod +x "$XWM"
-fi
 
 need() { [[ -x "$1" ]] || { echo "missing $1 — build with -Dbuild-app=true" >&2; exit 1; }; }
 need "$XWM"
@@ -67,7 +58,7 @@ done
 export DISPLAY=":$DISP_NUM"
 unset XAUTHORITY
 
-"$XWM" &
+"$XWM" -f "$ROOT/app/xwm/system.xwmrc" &
 WM_PID=$!
 sleep 0.3
 "$XTERM" -geometry 80x24+40+40 &

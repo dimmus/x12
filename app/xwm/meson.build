@@ -1,16 +1,24 @@
-# X12 reference WM (xwm): twm-class session face over the in-tree twm engine.
+# X12 reference WM — from-scratch ICCCM engine (ADR-0019).
 
 xwm_conf = configuration_data()
 xwm_conf.set('BINDIR', dir_bin)
 xwm_conf.set('DATADIR', dir_data)
 
-configure_file(
-  input: 'xwm.in',
-  output: 'xwm',
-  configuration: xwm_conf,
+xwm_src = files(
+  'main.c',
+  'atoms.c',
+  'client.c',
+  'config.c',
+  'events.c',
+  'menu.c',
+)
+
+executable(
+  'xwm',
+  xwm_src,
+  dependencies: [libx11, libxext, xproto],
+  c_args: ['-DDATADIR="@0@"'.format(dir_data)],
   install: true,
-  install_dir: dir_bin,
-  install_mode: 'rwxr-xr-x',
 )
 
 install_data('system.xwmrc', install_dir: dir_data / 'X11' / 'xwm')
