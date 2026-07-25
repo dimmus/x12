@@ -144,6 +144,13 @@ if ! "$ROOT/tests/security/run_deny_keylog.sh"; then
   FAIL=1
 fi
 
+# --- X12-SURFACE stub: QueryVersion via safe decode path ---
+echo "legacy: surface QueryVersion"
+if ! "$ROOT/tests/surface/run_query_version.sh"; then
+  echo "legacy: FAIL — surface QueryVersion" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "legacy: FAILED" >&2
   exit 1

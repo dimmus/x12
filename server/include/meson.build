@@ -130,6 +130,7 @@ conf_server.set('PANORAMIX',     build_xinerama)
 conf_server.set('RES',           build_res)
 conf_server.set('SCREENSAVER',   build_screensaver)
 conf_server.set('XACE',          build_xace)
+conf_server.set('X12SURFACE',    build_x12_surface)
 conf_server.set('XCSECURITY',    build_xsecurity)
 conf_server.set('XF86BIGFONT',   build_xf86bigfont)
 conf_server.set('XF86DRI',       true)
@@ -263,6 +264,7 @@ summary_srv += {'PANORAMIX':              build_xinerama}
 summary_srv += {'RES':                    build_res}
 summary_srv += {'SCREENSAVER':            build_screensaver}
 summary_srv += {'XACE':                   build_xace}
+summary_srv += {'X12SURFACE':             build_x12_surface}
 summary_srv += {'XCSECURITY':             build_xsecurity}
 summary_srv += {'XF86BIGFONT':            build_xf86bigfont}
 summary_srv += {'XFreeXDGA':              build_dga}

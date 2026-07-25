@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
@@ -37,21 +40,13 @@ jobs:
           fi
 
       - name: Configure
-        run: meson setup build -Dprefix=$PWD/prefix -Dbuild-debug=false
+        run: meson setup build -Dprefix=$PWD/prefix -Dbuild-debug=false -Dbuild-safe-proto=true
 
       - name: Compile
         run: meson compile -C build
 
-      - name: Legacy suite (includes deny_keylog)
-        run: ./tests/legacy/run.sh
-
-  safe-proto:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Safe protocol front-end tests
+      - name: Safe protocol front-end + drift gate
         run: ./tests/safe_proto/run.sh
+
+      - name: Legacy suite (deny_keylog + surface QueryVersion)
+        run: ./tests/legacy/run.sh

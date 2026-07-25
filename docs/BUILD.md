@@ -43,13 +43,15 @@ Important defaults for uninstalled/CI runs:
 
 Requires built `Xvfb`, `xauth`, `xterm`, `x11perf`, `xcmstest`. Also runs `tests/security/run_deny_keylog.sh`.
 
-## Safe protocol front-end
+## Safe protocol front-end / X12-SURFACE
 
 ```sh
-./tests/safe_proto/run.sh
+./tests/safe_proto/run.sh              # cargo test + IDL drift gate
+./tests/surface/run_query_version.sh   # live QueryVersion against Xvfb
 ```
 
-Rust crate `safe/x12-proto` (ADR-0011). Needs `cargo` on `PATH`.
+Rust crate `safe/x12-proto` (ADR-0011/0012). Needs `cargo` on `PATH` so meson can
+build `libx12_proto.a` and enable `X12SURFACE` in the server.
 
 ## Hierarchical levels (XACE)
 

@@ -188,4 +188,131 @@ mod tests {
         let err = decode_request(140, &buf, 0, ClientLevel::Full).unwrap_err();
         assert!(matches!(err, DecodeError::Truncated { .. }));
     }
+
+    #[test]
+    fn query_version_rejects_stray_fds() {
+        let mut body = Vec::new();
+        put_u32(&mut body, 1);
+        put_u32(&mut body, 0);
+        let buf = with_header(140, SurfaceOpcode::QueryVersion as u8, &body);
+        let err = decode_request(140, &buf, 1, ClientLevel::Full).unwrap_err();
+        assert!(matches!(err, DecodeError::FdCountMismatch { .. }));
+    }
+
+    fn present_body() -> Vec<u8> {
+        let mut body = Vec::new();
+        put_u32(&mut body, 0x10);
+        put_u32(&mut body, 0x20);
+        put_u32(&mut body, 7);
+        body.extend_from_slice(&[0u8; 8]);
+        put_u16(&mut body, 1u16); // x_off as bits
+        put_u16(&mut body, 0xffffu16); // y_off = -1
+        body.extend_from_slice(&[0u8; 4]);
+        put_u32(&mut body, 0x30);
+        put_u32(&mut body, 0x40);
+        put_u64(&mut body, 11);
+        put_u64(&mut body, 12);
+        put_u32(&mut body, 0b100); // TearFree
+        body.extend_from_slice(&[0u8; 4]);
+        put_u64(&mut body, 100);
+        put_u64(&mut body, 1);
+        put_u64(&mut body, 0);
+        body
+    }
+
+    #[test]
+    fn present_ok_and_sizes() {
+        let body = present_body();
+        assert_eq!(body.len(), 84);
+        let buf = with_header(140, SurfaceOpcode::Present as u8, &body);
+        assert_eq!(buf.len(), 88); // X12_PROTO_SZ_PRESENT_REQ
+        let d = decode_request(140, &buf, 0, ClientLevel::Full).unwrap();
+        match d {
+            DecodedRequest::X12Surface(DecodedSurfaceRequest::Present {
+                serial,
+                y_off,
+                acquire_point,
+                options,
+                ..
+            }) => {
+                assert_eq!(serial, 7);
+                assert_eq!(y_off, -1);
+                assert_eq!(acquire_point, 11);
+                assert_eq!(options, 0b100);
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+
+    #[test]
+    fn import_syncobj_requires_one_fd() {
+        let mut body = Vec::new();
+        put_u32(&mut body, 0x55);
+        put_u32(&mut body, 0x66);
+        let buf = with_header(140, SurfaceOpcode::ImportSyncobj as u8, &body);
+        assert_eq!(buf.len(), 12);
+        assert!(decode_request(140, &buf, 0, ClientLevel::Full).is_err());
+        let d = decode_request(140, &buf, 1, ClientLevel::User).unwrap();
+        match d {
+            DecodedRequest::X12Surface(DecodedSurfaceRequest::ImportSyncobj {
+                syncobj,
+                drawable,
+            }) => {
+                assert_eq!((syncobj, drawable), (0x55, 0x66));
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+
+    #[test]
+    fn ffi_fills_create_surface_out() {
+        let mut body = Vec::new();
+        put_u32(&mut body, 0x100);
+        put_u32(&mut body, 0x200);
+        body.push(1);
+        body.extend_from_slice(&[0, 0, 0]);
+        put_u16(&mut body, 32);
+        put_u16(&mut body, 48);
+        put_u32(&mut body, 128);
+        put_u32(&mut body, 0);
+        for _ in 0..6 {
+            put_u32(&mut body, 0);
+        }
+        body.push(24);
+        body.push(32);
+        body.extend_from_slice(&[0, 0]);
+        put_u64(&mut body, 9);
+        put_u32(&mut body, 0x34325258);
+        put_u32(&mut body, 0);
+        let buf = with_header(140, SurfaceOpcode::CreateSurface as u8, &body);
+        assert_eq!(buf.len(), 72);
+        let mut out = core::mem::MaybeUninit::<ffi::X12ProtoSurfaceDecoded>::uninit();
+        let rc = unsafe {
+            ffi::x12_proto_decode_surface(
+                140,
+                buf.as_ptr(),
+                buf.len(),
+                1,
+                ClientLevel::Full as u8,
+                out.as_mut_ptr(),
+            )
+        };
+        assert_eq!(rc, ffi::X12_PROTO_OK);
+        let out = unsafe { out.assume_init() };
+        assert_eq!(out.op, 3);
+        let cs = unsafe { out.u.create_surface };
+        assert_eq!(cs.surface, 0x100);
+        assert_eq!(cs.width, 32);
+        assert_eq!(cs.height, 48);
+        assert_eq!(cs.modifier, 9);
+        assert_eq!(cs.format, 0x34325258);
+    }
+
+    #[test]
+    fn wire_size_constants_match_header() {
+        // Keep in sync with safe/x12-proto/include/x12_proto.h and xcb structs.
+        assert_eq!(4 + 8, 12); // QueryVersion
+        assert_eq!(4 + 68, 72); // CreateSurface
+        assert_eq!(4 + 84, 88); // Present
+    }
 }

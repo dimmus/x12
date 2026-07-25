@@ -26,6 +26,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | [ADR-0009](adr/0009-meson-options-and-x12level.md) | meson.options + X12-LEVEL | **Accepted** | 2026-07-25 | Meson ≥1.1; deny-keylog G1 |
 | [ADR-0010](adr/0010-x12-surface-protocol.md) | X12-SURFACE dmabuf + sync IDL | **Accepted** | 2026-07-25 | ROADMAP step 5; server in step 7 |
 | [ADR-0011](adr/0011-rust-protocol-frontend.md) | Rust protocol front-end | **Accepted** | 2026-07-25 | ROADMAP step 6; `safe/x12-proto` |
+| [ADR-0012](adr/0012-surface-stub-and-safe-link.md) | Surface stub + linked Rust decode | **Accepted** | 2026-07-25 | Pre–step 7; QueryVersion live |
 
 ---
 
@@ -50,6 +51,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | D-ACC-15 | Remoting deferred (E skipped) |
 | D-ACC-16 | Native surfaces = `X12-SURFACE` XML (dmabuf/fourcc/modifier/syncobj); DRI3/Present kept for legacy |
 | D-ACC-17 | Protocol front-end language = **Rust** (`safe/x12-proto`); C ABI for dix hookup |
+| D-ACC-18 | X12-SURFACE requests decode-first via linked Rust; QueryVersion stub live; other ops BadImplementation until compositor |
 
 ---
 
@@ -58,7 +60,7 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | Topic | Next artifact |
 |---|---|
 | Exact hierarchical request matrix | Security extension protocol ADR |
-| Wire Rust front-end into dix + compositor + Vulkan client | ROADMAP step 7 |
+| Compositor + Vulkan client on X12-SURFACE | ROADMAP step 7 |
 | XML→Rust codec codegen | Follow-up when hand validators grow costly |
 | Remoting | Only if Dimmus reopens E* with a new ADR |
 
@@ -74,3 +76,4 @@ Detailed records live in [`adr/`](adr/). Strategy: [`STRATEGY.md`](STRATEGY.md).
 | 2026-07-25 | Meson + levels | ADR-0009; `meson.options`; X12-LEVEL; deny_keylog test |
 | 2026-07-25 | Surface IDL | ADR-0010; `x12_surface.xml`; ROADMAP step 5 |
 | 2026-07-25 | Safe front-end | ADR-0011; Rust `safe/x12-proto`; ROADMAP step 6 |
+| 2026-07-25 | Step 7 prep | ADR-0012; ABI out-struct; X12-SURFACE stub; drift + QueryVersion smoke |
