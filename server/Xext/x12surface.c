@@ -868,10 +868,13 @@ ProcX12SurfaceCreateSurface(ClientPtr client,
     }
 
     if (cs->num_buffers < 1 || cs->num_buffers > 4 ||
-        (cs->modifier != X12_MOD_LINEAR && cs->modifier != X12_MOD_INVALID) ||
-        (cs->format != X12_FOURCC_XR24 && cs->format != X12_FOURCC_AR24) ||
-        cs->bpp != 32 || (cs->depth != 24 && cs->depth != 32) ||
         cs->strides[0] < (uint32_t)cs->width * 4) {
+        X12SurfaceDrainFds(client);
+        return BadValue;
+    }
+    if ((cs->modifier != X12_MOD_LINEAR && cs->modifier != X12_MOD_INVALID) ||
+        (cs->format != X12_FOURCC_XR24 && cs->format != X12_FOURCC_AR24) ||
+        cs->bpp != 32 || (cs->depth != 24 && cs->depth != 32)) {
         X12SurfaceDrainFds(client);
         return BadMatch;
     }
