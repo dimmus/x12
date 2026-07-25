@@ -1,0 +1,26 @@
+#!/bin/sh
+# X12 default session: xwm + xterm (prefix-aware).
+# Usage: xinit @DATADIR@/X11/xwm/x12-xinitrc -- @BINDIR@/Xvfb :1 -screen 0 1280x800x24
+set -eu
+
+BINDIR="@BINDIR@"
+export PATH="$BINDIR:$PATH"
+
+if [ -f "$HOME/.Xresources" ] && [ -x "$BINDIR/xrdb" ]; then
+  "$BINDIR/xrdb" -nocpp -merge "$HOME/.Xresources" || true
+fi
+if [ -f "$HOME/.Xmodmap" ] && [ -x "$BINDIR/xmodmap" ]; then
+  "$BINDIR/xmodmap" "$HOME/.Xmodmap" || true
+fi
+
+"$BINDIR/xwm" &
+wm_pid=$!
+
+if [ -x "$BINDIR/xclock" ]; then
+  "$BINDIR/xclock" -geometry 100x100-0+0 &
+fi
+
+"$BINDIR/xterm" -geometry 80x24+40+40 &
+"$BINDIR/xterm" -geometry 80x24+120+120 &
+
+wait "$wm_pid"

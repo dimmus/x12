@@ -43,6 +43,12 @@ if ! "$ROOT/tests/surface/run_scale_stub.sh"; then
   FAIL=1
 fi
 
+echo "x12: xwm manage"
+if ! "$ROOT/tests/x12/run_wm.sh"; then
+  echo "x12: FAIL — xwm manage" >&2
+  FAIL=1
+fi
+
 if [[ "$FAIL" -ne 0 ]]; then
   echo "x12: FAILED" >&2
   exit 1
