@@ -123,7 +123,7 @@ Historical modular X.Org vs your monolithic `X11R8` approach.
 | **PipeWire / portals (capture)** | Interop for screen share without ambient root window access |
 | **libinput / libei / libeis** | Modern input + remote/emulated input with consent |
 | **HDR / color (KMS HDR, ICC, scRGB/PQ)** | First-class color pipeline |
-| **QUIC / SCTP + TLS 1.3** | Candidate transports for secure remoting (study Mercurius) |
+| **QUIC / SCTP + TLS 1.3** | Remoting deferred (E*); keep as future study only |
 | **Seat management (seatd / logind)** | Non-systemd and systemd deployments (XLibre already tracks seatd) |
 | **Memory-safe protocol codecs (Rust/Zig optional crates)** | Isolate untrusted byte streams from C renderer core |
 | **Fuzzing (libFuzzer/AFL++) + ASAN/UBSAN CI** | Mandatory given Xserver CVE history |
